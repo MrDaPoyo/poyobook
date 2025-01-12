@@ -27,17 +27,21 @@ app.get('/', (req, res) => {
     res.render('index');
 });
 
-app.get('/:path', async (req, res) => {
-    res.render(await req.params.path, (err, html) => {
-        if (err) {
-            res.status(404).send('File not found');
-        } else {
-            res.send(html);
-        }
-    });
+app.get('/auth', (req, res) => {
+    res.render('auth');
+});
+
+app.post('/auth/login', (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+    if (username === 'admin' && password === 'password') {
+        res.render('success');
+    } else {
+        res.render('failure');
+    }
 });
 
 // Start the server
 app.listen(port, () => {
-    console.log(`Guestbook service running at http://localhost:${port}`);
+    console.log(`PoyoBook service running at http://localhost:${port}`);
 });

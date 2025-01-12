@@ -37,18 +37,15 @@ const loggedInMiddleware = async (req, res, next) => {
         res.status(401).json({ error: 'Unauthorized', success: false });
         return;
     }
-
-    try {
-        const decoded = await jwt.verify(token, process.env.AUTH_SECRET);
-        if (decoded.success) {
-            req.user = decoded;
-            next();
-        } else {
-            res.status(401).json({ error: 'Unauthorized', success: false });
+    jwt.verify(token, process.env.AUTH_SECRET, (err, decoded) => {
+        if (err) {
+            return { success: false };
         }
-    } catch (error) {
-        res.status(500).json({ error: error });
-    }
+        req.user = decoded;
+        res.locals.user = decoded;
+        next();
+    });
+
 }
 
 app.get('/', (req, res) => {
@@ -82,7 +79,7 @@ app.post('/auth/login', async (req, res) => {
 app.post('/auth/register', async (req, res) => {
     var { username, email, password } = await req.body;
     if (!username || !email || !password) {
-        return res.status(400).json({ error: 'Missing required fields', success: false});
+        return res.status(400).json({ error: 'Missing required fields', success: false });
     } else if (email.length > 254) {
         return res.status(400).json({ error: 'Email address is too long', success: false });
     }
@@ -90,10 +87,10 @@ app.post('/auth/register', async (req, res) => {
     username = username.trim();
     var usernameTest = checkUsername(username);
     if (!usernameTest) {
-    	return res.status(400).json({error: usernameTest, success: false});
+        return res.status(400).json({ error: usernameTest, success: false });
     }
     if (process.env.CONFIG_MAX_USERS < await db.getUserCount()) {
-    	return res.status(400).json({ error: 'Max user capacity reached', success: false})
+        return res.status(400).json({ error: 'Max user capacity reached', success: false })
     } else if (password.length > 7) {
         try {
             const hashedPassword = await db.hashPassword(password);

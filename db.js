@@ -117,6 +117,18 @@ function loginUser(userEmailOrName, password) {
     });
 }
 
+function getUserById(id) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT * FROM users WHERE id = ?`;
+        db.get(query, [id], (err, row) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(row);
+        });
+    });
+}
+
 function getUserCount() {
     return new Promise((resolve, reject) => {
         const query = `SELECT COUNT(*) AS count FROM users`;
@@ -134,5 +146,6 @@ module.exports = {
     createUser,
     loginUser,
     hashPassword,
+    getUserById,
     getUserCount,
 };

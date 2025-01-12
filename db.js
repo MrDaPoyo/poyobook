@@ -141,6 +141,18 @@ function getUserCount() {
     });
 }
 
+function getMessages(guestbookID) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT * FROM messages WHERE guestbookID = ?`;
+        db.all(query, [guestbookID], (err, rows) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(rows);
+        });
+    });
+}
+
 module.exports = {
     db,
     createUser,
@@ -148,4 +160,5 @@ module.exports = {
     hashPassword,
     getUserById,
     getUserCount,
+    getMessages,
 };

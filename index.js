@@ -111,7 +111,7 @@ app.post('/auth/register', async (req, res) => {
 });
 
 app.get('/dashboard', loggedInMiddleware, async (req, res) => {
-    res.render('dashboard', { user: await db.getUserById(req.user.id) });
+    res.render('dashboard', { user: await db.getUserById(req.user.id), messages: await db.getMessages(req.user.id) });
 });
 
 // Start the server

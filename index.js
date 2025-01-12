@@ -36,13 +36,13 @@ app.get('/auth', (req, res) => {
 });
 
 app.post('/auth/login', async (req, res) => {
-    const { user, password } = req.body;
-    if ((!user) || !password) {
+    const { email, password } = req.body;
+    if ((!email) || !password) {
         res.status(400).json({ error: 'Missing required fields', success: false });
         return;
     } else {
         try {
-            const result = await db.loginUser(user, password);
+            const result = await db.loginUser(email, password);
             if (result.success) {
                 res.status(200).json({ message: 'User logged in successfully', jwt: result.jwt, success: result.success });
             } else {

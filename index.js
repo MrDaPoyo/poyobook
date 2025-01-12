@@ -1,15 +1,19 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
 var db = require('./db');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const app = express();
 const port = 3000;
 const path = require('path');
+
 app.use(bodyParser.json());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 var userBlacklist = ['admin', 'administrator', 'root', 'moderator', 'mod', 'staff', 'owner', 'developer', 'dev', 'owner', 'webmaster', 'host', 'support', 'contact', 'info', 'help', 'team', 'blog'];
 
@@ -24,6 +28,26 @@ function checkUsername(username) {
         return 'Username is blacklisted, try again with a different username';
     } else {
         return true;
+    }
+}
+
+const loggedInMiddleware = async (req, res, next) => {
+    const token = req.cookies['authorization'];
+    if (!token) {
+        res.status(401).json({ error: 'Unauthorized', success: false });
+        return;
+    }
+
+    try {
+        const decoded = await jwt.verify(token, process.env.AUTH_SECRET);
+        if (decoded.success) {
+            req.user = decoded;
+            next();
+        } else {
+            res.status(401).json({ error: 'Unauthorized', success: false });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error });
     }
 }
 
@@ -44,6 +68,7 @@ app.post('/auth/login', async (req, res) => {
         try {
             const result = await db.loginUser(email, password);
             if (result.success) {
+                res.cookie('authorization', result.jwt, { httpOnly: true, secure: true });
                 res.status(200).json({ message: 'User logged in successfully', jwt: result.jwt, success: result.success });
             } else {
                 res.status(400).json({ error: result.message, success: result.success });
@@ -75,6 +100,7 @@ app.post('/auth/register', async (req, res) => {
             const result = await db.createUser(username, email, await hashedPassword);
 
             if (result.success) {
+                res.cookie('authorization', result.jwt, { httpOnly: true, secure: true });
                 res.status(201).json({ message: 'User registered successfully', jwt: result.jwt, success: result.success });
             } else {
                 res.status(400).json({ error: result.message, success: result.success });
@@ -85,6 +111,10 @@ app.post('/auth/register', async (req, res) => {
     } else {
         res.status(400).json({ error: 'Password must be at least 8 characters long', success: false });
     }
+});
+
+app.get('/dashboard', loggedInMiddleware, (req, res) => {
+    res.render('dashboard');
 });
 
 // Start the server

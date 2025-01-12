@@ -1,0 +1,27 @@
+{
+  "name": "poyobook",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrDaPoyo/poyobook.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MrDaPoyo/poyobook/issues"
+  },
+  "homepage": "https://github.com/MrDaPoyo/poyobook#readme",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "cookie-parser": "^1.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "ico": "^0.3.3",
+    "nodemailer": "^6.9.16"
+  }
+}

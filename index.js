@@ -51,7 +51,6 @@ const loggedInMiddleware = async (req, res, next) => {
 app.get('/', async (req, res) => {
     var host = req.headers.host;
     host = await host.split('.')[0];
-    console.log(await host);
     try {
         if (req.headers.host == process.env.HOST) {
             res.render('index');

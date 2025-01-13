@@ -73,6 +73,13 @@ function createUser(username, email, password) {
 
             const userId = this.lastID;
             console.log(`User created with ID: ${userId}`);
+            const guestbookQuery = `INSERT INTO guestbooks (userID, name, domain) VALUES (?, ?, ?)`;
+            db.run(guestbookQuery, [userId, username, `${username}.${process.env.SHORT_HOST}`], function (err) {
+                if (err) {
+                    return reject({ success: false, message: err.message });
+                }
+                console.log(`Guestbook created for user ID: ${userId}`);
+            });
             resolve({ success: true, jwt: jwt.sign({ id: userId }, process.env.AUTH_SECRET) });
         });
     });
@@ -167,12 +174,23 @@ function getMessages(guestbookID) {
 
 function getGuestbookByUsername(username) {
     return new Promise((resolve, reject) => {
-        const query = `SELECT * FROM guestbooks WHERE domain = ?`;
+        const query = `SELECT * FROM guestbooks WHERE name = ?`;
         db.get(query, [username], (err, row) => {
             if (err) {
-                reject(undefined);
+                return reject(undefined);
             }
-            resolve(row);
+            db.get(`UPDATE guestbooks SET views = views + 1 WHERE id = ?`, [row.id], (err) => {
+                if (err) {
+                    return reject(undefined);
+                }
+                getMessages(row.id).then(messages => {
+                    row.messages = messages;
+                }).catch(err => {
+                    return reject(undefined);
+                });
+                resolve(row);
+            });
+            
         });
     });
 }

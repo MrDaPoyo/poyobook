@@ -49,15 +49,22 @@ const loggedInMiddleware = async (req, res, next) => {
 }
 
 app.get('/', async (req, res) => {
-    if (req.headers.host == process.env.HOST) {
-        res.render('index');
-    } else {
-        var guestbook = await db.getGuestbookByUsername(req.headers.host)
-        if (guestbook) {
-            res.render('guestbook', { guestbook: guestbook });
+    var host = req.headers.host;
+    host = await host.split('.')[0];
+    console.log(await host);
+    try {
+        if (req.headers.host == process.env.HOST) {
+            res.render('index');
         } else {
-            res.status(404).send('Guestbook not found');
+            var guestbook = await db.getGuestbookByUsername(host);
+            if (guestbook) {
+                res.render('guestbook', { guestbook: guestbook });
+            } else {
+                res.status(404).send('Guestbook not found');
+            }
         }
+    } catch (error) {
+        res.status(500).send('Internal Server Error');
     }
 });
 

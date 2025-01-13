@@ -1,6 +1,6 @@
 # poyobook
 ```
-HOST=poyobook.org
+HOST=localhost:3000
 
 AUTH_SECRET=josajdlsjaldkajsldkasldkajsdjlakjsdlkasjdñlflfjalksfnjlqñfñlkwnlkñfnqwlñfnlñqfnlwfnkljwensfkjlnf
 

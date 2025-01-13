@@ -1,5 +1,7 @@
 # poyobook
 ```
+HOST=poyobook.org
+
 AUTH_SECRET=josajdlsjaldkajsldkasldkajsdjlakjsdlkasjdñlflfjalksfnjlqñfñlkwnlkñfnqwlñfnlñqfnlwfnkljwensfkjlnf
 
 CONFIG_MAX_USERS=1000

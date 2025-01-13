@@ -2,7 +2,7 @@ const sqlite3 = require('sqlite3').verbose();
 const { on } = require('events');
 const fs = require('fs');
 const path = require('path');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
@@ -165,6 +165,18 @@ function getMessages(guestbookID) {
     });
 }
 
+function getGuestbookByUsername(username) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT * FROM guestbooks WHERE domain = ?`;
+        db.get(query, [username], (err, row) => {
+            if (err) {
+                reject(undefined);
+            }
+            resolve(row);
+        });
+    });
+}
+
 module.exports = {
     db,
     createUser,
@@ -174,4 +186,5 @@ module.exports = {
     getUserIdByUsername,
     getUserCount,
     getMessages,
+    getGuestbookByUsername,
 };

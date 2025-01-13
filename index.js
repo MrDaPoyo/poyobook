@@ -48,8 +48,17 @@ const loggedInMiddleware = async (req, res, next) => {
 
 }
 
-app.get('/', (req, res) => {
-    res.render('index');
+app.get('/', async (req, res) => {
+    if (req.headers.host == process.env.HOST) {
+        res.render('index');
+    } else {
+        var guestbook = await db.getGuestbookByUsername(req.headers.host)
+        if (guestbook) {
+            res.render('guestbook', { guestbook: guestbook });
+        } else {
+            res.status(404).send('Guestbook not found');
+        }
+    }
 });
 
 app.get('/auth', (req, res) => {

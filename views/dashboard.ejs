@@ -1,7 +1,12 @@
 <% include('header') %>
     <h1>Dashboard nya</h1>
     <p>Welcome, <%- user.username %>.</p>
-    <% for (var i = 0; i < messages.length; i++) { %>
-        <p><%- messages[i].title %></p>
+    <% if (messages.length == 0) { %>
+        <p>No messages, <i>yet</i>.</p>
+    <% } else { %>
+        <p>Messages:</p>
+        <% for (var i = 0; i < messages.length; i++) { %>
+            <p><%- messages[i].title %></p>
+        <% } %>
     <% } %>
 <% include('footer') %>

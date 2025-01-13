@@ -120,6 +120,12 @@ app.get('/logout', (req, res) => {
 });
 
 app.post('/addEntry', async (req, res) => {
+    var host = req.headers.host;
+    const user = host.split('.')[0];
+    const userId = await db.getUserIdByUsername(user);
+    if (!userId) {
+        return res.status(400).json({ error: 'Guestbook gone poof! :P', success: false });
+    }
     var { username, message } = req.body;
     if (!message) {
         return res.status(400).json({ error: 'Message is required', success: false });
@@ -133,6 +139,7 @@ app.post('/addEntry', async (req, res) => {
         return res.status(400).json({ error: usernameTest, success: false });
     }
     try {
+        db.addEntry(userId, username, req.body.website || null, message);
         res.status(201).json({ message: 'Entry added successfully', success: true });
     } catch (error) {
         res.status(500).json({ error: error.message, success: false });

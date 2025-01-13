@@ -114,6 +114,31 @@ app.get('/dashboard', loggedInMiddleware, async (req, res) => {
     res.render('dashboard', { user: await db.getUserById(req.user.id), messages: await db.getMessages(req.user.id) });
 });
 
+app.get('/logout', (req, res) => {
+    res.clearCookie('authorization');
+    res.redirect('/');
+});
+
+app.post('/addEntry', async (req, res) => {
+    var { username, message } = req.body;
+    if (!message) {
+        return res.status(400).json({ error: 'Message is required', success: false });
+    }
+    if (!username) {
+        username = 'Anonymous' + Math.floor(Math.random() * 1000);
+    }
+    username = username.toLowerCase().trim();
+    const usernameTest = checkUsername(username);
+    if (usernameTest !== true) {
+        return res.status(400).json({ error: usernameTest, success: false });
+    }
+    try {
+        res.status(201).json({ message: 'Entry added successfully', success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message, success: false });
+    }
+});
+
 // Start the server
 app.listen(port, () => {
     console.log(`PoyoBook service running at http://localhost:${port}`);

@@ -1,4 +1,9 @@
 <% include('header') %>
     <h1>PoyoBook! · Free guestbooks for everyone :3</h1>
-    <p>Create yours <strong>TODAY</strong>(!!!) <a href="/auth">-></a></p>
+    <% if (user) { %>
+        <p>Welcome, <strong><%= user.username %></strong>!</p>
+        <p>Access the dashboard. <a href="/dashboard">-></a></p>
+    <% } else { %>
+        <p>Create yours <strong>TODAY</strong>(!!!) <a href="/auth">-></a></p>
+    <% } %>
 <% include('footer') %>

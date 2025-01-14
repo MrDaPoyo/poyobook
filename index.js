@@ -31,6 +31,25 @@ function checkUsername(username) {
     }
 }
 
+const userMiddleware = async (req, res, next) => {
+    const token = req.cookies['authorization'];
+    if (!token) {
+        res.locals.user = null;
+        next();
+        return;
+    }
+    jwt.verify(token, process.env.AUTH_SECRET, async (err, decoded) => {
+        if (err) {
+            res.locals.user = null;
+            cookieParser.clearCookie('authorization');
+            next();
+            return;
+        }
+        res.locals.user = await db.getUserById(decoded.id);
+        next();
+    });
+}
+
 const loggedInMiddleware = async (req, res, next) => {
     const token = req.cookies['authorization'];
     if (!token) {
@@ -45,10 +64,18 @@ const loggedInMiddleware = async (req, res, next) => {
         res.locals.user = decoded;
         next();
     });
-
 }
 
-app.get('/', async (req, res) => {
+const notLoggedInMiddleware = async (req, res, next) => {
+    const token = req.cookies['authorization'];
+    if (token) {
+        res.redirect('/');
+        return;
+    }
+    next();
+}
+
+app.get('/', userMiddleware, async (req, res) => {
     var host = req.headers.host;
     host = await host.split('.')[0];
     try {
@@ -67,7 +94,7 @@ app.get('/', async (req, res) => {
     }
 });
 
-app.get('/auth', (req, res) => {
+app.get('/auth', notLoggedInMiddleware, (req, res) => {
     res.render('auth');
 });
 
@@ -81,7 +108,7 @@ app.post('/auth/login', async (req, res) => {
             const result = await db.loginUser(email, password);
             if (result.success) {
                 res.cookie('authorization', result.jwt, { httpOnly: true, secure: true });
-                res.status(200).json({ message: 'User logged in successfully', jwt: result.jwt, success: result.success });
+                res.redirect('/dashboard');
             } else {
                 res.status(400).json({ error: result.message, success: result.success });
             }

@@ -185,12 +185,24 @@ function getGuestbookByUsername(username) {
                 }
                 getMessages(row.id).then(messages => {
                     row.messages = messages;
+                    resolve(row);
                 }).catch(err => {
-                    return reject(undefined);
+                    return reject(err);
                 });
-                resolve(row);
             });
             
+        });
+    });
+}
+
+function addEntry(userId, username, website, message) {
+    return new Promise((resolve, reject) => {
+        const query = `INSERT INTO messages (guestbookID, name, website, message) VALUES (?, ?, ?, ?)`;
+        db.run(query, [userId, username, website, message], function (err) {
+            if (err) {
+                return reject(err);
+            }
+            resolve({ success: true, message: 'Entry added successfully' });
         });
     });
 }
@@ -205,4 +217,5 @@ module.exports = {
     getUserCount,
     getMessages,
     getGuestbookByUsername,
+    addEntry
 };

@@ -1,4 +1,16 @@
 <% include('header') %>
 <h1>The Guestbook Of <%= guestbook.name.charAt(0).toUpperCase() + guestbook.name.slice(1) %></h1>
-<%= JSON.stringify(guestbook) %> 
+<form action="/addEntry" method="post">
+    <input type="text" name="name" placeholder="Your Username (defaults to Anonymous)" required>
+    <input type="text" name="message" placeholder="Leave a message" required>
+    <button type="submit">Submit</button>
+</form>
+<h2>Messages</h2>
+<ul>
+    <% guestbook.messages.forEach(function(message) { %>
+        <li>
+            <strong><%= message.name %>:</strong> <%= message.message %> <em>(<%= message.createdAt %>)</em>
+        </li>
+    <% }); %>
+</ul>
 <% include('footer') %>

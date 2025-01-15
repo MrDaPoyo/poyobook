@@ -1,4 +1,4 @@
-<% include('header') %>
+<%- include('header') %>
     <h1>Dashboard nya</h1>
     <p>Welcome, <%= user.username %>.</p>
     <strong>Guestbook available at <a href="https://<%= user.username %>.<%= env.host %>/">https://<%= user.username %>.<%= env.host %>/</a></strong>
@@ -13,4 +13,4 @@
             </li>
         <% }); %>
     <% } %>
-<% include('footer') %>
+<%- include('footer') %>

@@ -1,0 +1,21 @@
+:root {
+    --primary: black;
+    --secondary: #add8e6;
+}
+
+@font-face {
+    font-family: 'easvhs';
+    src: url(/fonts/easvhs.ttf);
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    background-color: var(--primary);
+    color: var(--secondary);
+    font-family: 'easvhs', roboto;
+}
+
+a {
+    color: var(--secondary);
+}

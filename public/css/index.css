@@ -19,3 +19,9 @@ body {
 a {
     color: var(--secondary);
 }
+
+input, button {
+    background-color: var(--primary);
+    color: var(--secondary);
+    border: 1px solid var(--secondary);
+}

@@ -32,6 +32,18 @@ function checkUsername(username) {
     }
 }
 
+function checkGuestbookUsername(username) {
+    const regex = /^[a-zA-Z0-9 ]+$/; // Regex to allow alphanumeric characters and spaces
+
+    if (username.length > 20) {
+        return 'Username must have at max 20 characters';
+    } else if (!regex.test(username)) {
+        return 'Username must contain only letters and numbers';
+    } else {
+        return true;
+    }
+}
+
 const basicMiddleware = async (req, res, next) => {
     res.locals.env = process.env;
     next();
@@ -185,13 +197,13 @@ app.post('/addEntry', async (req, res) => {
         username = 'Anonymous' + Math.floor(Math.random() * 1000);
     }
     username = username.toLowerCase().trim();
-    const usernameTest = checkUsername(username);
+    const usernameTest = checkGuestbookUsername(username);
     if (usernameTest !== true) {
         return res.status(400).json({ error: usernameTest, success: false });
     }
     try {
         db.addEntry(userId, username, req.body.website || null, message);
-        res.status(201).json({ message: 'Entry added successfully', success: true });
+        res.redirect('/?message=Entry added successfully! :3');
     } catch (error) {
         res.status(500).json({ error: error.message, success: false });
     }

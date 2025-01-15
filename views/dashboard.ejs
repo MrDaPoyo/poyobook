@@ -1,13 +1,16 @@
 <% include('header') %>
     <h1>Dashboard nya</h1>
     <p>Welcome, <%= user.username %>.</p>
+    <strong>Guestbook available at <a href="https://<%= user.username %>.<%= env.host %>/">https://<%= user.username %>.<%= env.host %>/</a></strong>
     <h3>Inbox</h3>
-    <% if (messages.length == 0) { %>
+    <% if (guestbook.messages.length == 0) { %>
         <p>No messages, <i>yet</i>.</p>
     <% } else { %>
         <p>Messages:</p>
-        <% for (var i = 0; i < messages.length; i++) { %>
-            <p><%- messages[i].title %></p>
-        <% } %>
+        <% guestbook.messages.forEach(function(message) { %>
+            <li>
+                <strong><%= message.name %>:</strong> <%= message.message %> <em>(<%= message.createdAt %>)</em>
+            </li>
+        <% }); %>
     <% } %>
 <% include('footer') %>

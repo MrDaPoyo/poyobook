@@ -31,6 +31,13 @@ function checkUsername(username) {
     }
 }
 
+const basicMiddleware = async (req, res, next) => {
+    res.locals.env = process.env;
+    next();
+}
+
+app.use(basicMiddleware);
+
 const userMiddleware = async (req, res, next) => {
     const token = req.cookies['authorization'];
     if (!token) {
@@ -153,7 +160,8 @@ app.post('/auth/register', async (req, res) => {
 });
 
 app.get('/dashboard', loggedInMiddleware, async (req, res) => {
-    res.render('dashboard', { user: await db.getUserById(req.user.id), messages: await db.getMessages(req.user.id) });
+    const user = await db.getUserById(req.user.id);
+    res.render('dashboard', { user: user, guestbook: await db.getGuestbookByUsername(user.username) });
 });
 
 app.get('/logout', (req, res) => {

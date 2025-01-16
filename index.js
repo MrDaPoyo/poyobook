@@ -5,10 +5,42 @@ var db = require('./db');
 const fs = require('fs-extra');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (ext === '.jpg' || ext === '.jpeg' || ext === '.png' || ext === '.gif') {
+            cb(null, true);
+        } else {
+            cb(new Error('Not a valid image extension! Please upload a .jpg, .jpeg, .png, or .gif file.'), false);
+        }
+    } else {
+        cb(new Error('Not an image! Please upload an image.'), false);
+    }
+};
+
+const drawboxUploadImage = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: {
+        fileSize: 10 * 1024
+    }
+}).single('image');
 
 const app = express();
 const port = 3000;
 const path = require('path');
+const sharp = require('sharp');
 
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -191,9 +223,7 @@ app.post('/auth/register', async (req, res) => {
 
 app.get('/dashboard', loggedInMiddleware, async (req, res) => {
     const user = await db.getUserById(req.user.id);
-    var guestbook = await db.getGuestbookByUsername(user.username);
-    guestbook.messages = await db.getMessages(guestbook.id);
-    res.render('dashboard', { user: user, guestbook: guestbook, title: 'Dashboard' });
+    res.render('dashboard', { user: user, title: 'Dashboard' });
 });
 
 app.get('/logout', (req, res) => {
@@ -201,30 +231,28 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-app.post('/addEntry', async (req, res) => {
-    var host = req.headers.host;
-    const user = host.split('.')[0];
-    const userId = await db.getUserIdByUsername(user);
-    if (!userId) {
-        return res.status(400).json({ error: 'Guestbook gone poof! :P', success: false });
+app.post('/addEntry', drawboxUploadImage, async (req, res) => {
+    const host = req.headers.host;
+    const drawbox = await db.getDrawboxByUsername(host);
+
+    if (!drawbox) {
+        return res.status(404).json({ error: 'Drawbox gone poof! :P', success: false });
     }
-    var { username, message } = req.body;
-    if (!message) {
-        return res.status(400).json({ error: 'Message is required', success: false });
-    }
-    if (!username) {
-        username = 'Anonymous' + Math.floor(Math.random() * 1000);
-    }
-    username = username.toLowerCase().trim();
-    const usernameTest = checkGuestbookUsername(username);
-    if (usernameTest !== true) {
-        return res.status(400).json({ error: usernameTest, success: false });
-    }
+
+    const userDir = path.join('users', drawbox.username, 'images');
+
     try {
-        db.addEntry(userId, username, req.body.website || null, message);
-        res.redirect('/?message=Entry added successfully! :3');
+        await fs.ensureDir(userDir);
+        const filePath = path.join(userDir, req.file.filename);
+        await fs.move(req.file.path, filePath);
+
+        await sharp(filePath)
+            .resize(100, 100)
+            .toFile(path.join(userDir, 'resized-' + req.file.filename));
+        db.addEntry(drawbox.id, req.body.message, req.file.filename);
+        res.status(200).json({ message: 'Image uploaded and resized successfully!' });
     } catch (error) {
-        res.status(500).json({ error: error.message, success: false });
+        res.status(500).json({ error: error.message });
     }
 });
 
@@ -233,27 +261,13 @@ app.post('/setDomain', loggedInMiddleware, async (req, res) => {
     const userId = req.user.id;
 
     try {
-        const query = `UPDATE guestbooks SET domain = ? WHERE userID = ?`;
+        const query = `UPDATE drawboxes SET domain = ? WHERE userID = ?`;
         await db.db.run(query, [domain, userId]);
-        res.redirect('/dashboard');
+        res.redirect('/dashboard?message=Domain set successfully! :3');
     } catch (error) {
         res.status(500).json({ error: error.message, success: false });
     }
 });
-
-app.post('/setModality', loggedInMiddleware, async (req, res) => {
-    const { modality } = req.body;
-    const userId = req.user.id;
-
-    try {
-        const query = `UPDATE guestbooks SET modality = ? WHERE userID = ?`;
-        await db.db.run(query, [modality, userId]);
-        res.redirect('/dashboard');
-    } catch (error) {
-        res.status(500).json({ error: error.message, success: false });
-    }
-});
-
 
 fs.ensureDirSync('users');
 

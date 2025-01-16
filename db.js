@@ -23,31 +23,8 @@ function setupDB() {
     verified BOOLEAN DEFAULT FALSE,
     apiKey TEXT DEFAULT NULL,
     tier INTEGER NOT NULL DEFAULT 0,
-    modality TEXT DEFAULT 'guestbook',
+    modality TEXT DEFAULT 'drawbox',
     admin INTEGER NOT NULL DEFAULT 0)`);
-
-    // Create drawboxes table
-    db.run(`CREATE TABLE IF NOT EXISTS guestbooks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    userID INTEGER NOT NULL,
-    name TEXT UNIQUE NOT NULL,
-    domain TEXT UNIQUE NOT NULL,
-    views INTEGER DEFAULT 0,
-    totalMessages INTEGER DEFAULT 0,
-    tier INTEGER DEFAULT 1,
-    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    lastUpdated DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (userID) REFERENCES users(id))`);
-
-    // Create messages table
-    db.run(`CREATE TABLE IF NOT EXISTS messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    guestbookID INTEGER NOT NULL,
-    name TEXT DEFAULT 'Anonymous',
-    website TEXT,
-    message TEXT NOT NULL,
-    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (guestbookID) REFERENCES guestbooks(id))`);
     
     // Create drawboxes table
     db.run(`CREATE TABLE IF NOT EXISTS drawboxes (
@@ -96,12 +73,12 @@ function createUser(username, email, password) {
 
             const userId = this.lastID;
             console.log(`User created with ID: ${userId}`);
-            const guestbookQuery = `INSERT INTO guestbooks (userID, name, domain) VALUES (?, ?, ?)`;
-            db.run(guestbookQuery, [userId, username, `${username}.${process.env.SHORT_HOST}`], function (err) {
+            const drawboxQuery = `INSERT INTO drawboxes (userID, name, domain) VALUES (?, ?, ?)`;
+            db.run(drawboxQuery, [userId, username, `${username}.${process.env.SHORT_HOST}`], function (err) {
                 if (err) {
                     return reject({ success: false, message: err.message });
                 }
-                console.log(`Guestbook created for user ID: ${userId}`);
+                console.log(`Drawbox created for user ID: ${userId}`);
             });
             resolve({ success: true, jwt: jwt.sign({ id: userId }, process.env.AUTH_SECRET) });
         });
@@ -195,41 +172,6 @@ function doesUserExist(id) {
     });
 }
 
-function getMessages(guestbookID) {
-    return new Promise((resolve, reject) => {
-        const query = `SELECT * FROM messages WHERE guestbookID = ?`;
-        db.all(query, [guestbookID], (err, rows) => {
-            if (err) {
-                reject(err);
-            }
-            resolve(rows);
-        });
-    });
-}
-
-function getGuestbookByUsername(username) {
-    return new Promise((resolve, reject) => {
-        const query = `SELECT * FROM guestbooks WHERE name = ?`;
-        db.get(query, [username], (err, row) => {
-            if (err) {
-                return reject(undefined);
-            }
-            resolve(row);
-        });
-    });
-}
-
-function addEntry(userId, username, website, message) {
-    return new Promise((resolve, reject) => {
-        const query = `INSERT INTO messages (guestbookID, name, website, message) VALUES (?, ?, ?, ?)`;
-        db.run(query, [userId, username, website, message], function (err) {
-            if (err) {
-                return reject(err);
-            }
-            resolve({ success: true, message: 'Entry added successfully' });
-        });
-    });
-}
 
 module.exports = {
     db,
@@ -239,8 +181,5 @@ module.exports = {
     getUserById,
     getUserIdByUsername,
     getUserCount,
-    doesUserExist,
-    getMessages,
-    getGuestbookByUsername,
-    addEntry
+    doesUserExist
 };

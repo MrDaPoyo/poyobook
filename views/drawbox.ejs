@@ -47,10 +47,15 @@
                         console.error('Error:', xhr.statusText);
                     }
                 };
+                setTimeout(() => {}, 2000);
                 window.location.reload();
             }
         </script>
         <hr>
-        <%- JSON.stringify(drawbox) %>
+        <div class="image-gallery">
+            <% drawbox.images.forEach(image => { %>
+                <img src="/retrieveImage/<%= image.id %>" alt="Drawing" style="max-width: 200px; margin: 10px;">
+            <% }); %>
+        </div>
     </div>
 </body>

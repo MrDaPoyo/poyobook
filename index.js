@@ -158,11 +158,11 @@ app.get('/retrieveImage/:id', async (req, res) => {
     }
     const userDir = path.join('users', drawbox.name, 'images');
     const id = req.params.id;
-    const filePath = path.join(userDir, id);
+    const filePath = path.join(userDir, `${id}.png`);
 
     // Check if the file exists
     if (fs.existsSync(filePath)) {
-        res.sendFile(filePath);
+        res.sendFile(path.resolve(filePath));
     } else {
         res.status(404).json({ error: 'Image not found', success: false });
     }
@@ -229,7 +229,7 @@ app.post('/auth/register', async (req, res) => {
 
 app.get('/dashboard', loggedInMiddleware, async (req, res) => {
     const user = await db.getUserById(req.user.id);
-    res.render('dashboard', { user: user, drawbox: await db.getDrawboxById(user.id), title: 'Dashboard' });
+    res.render('dashboard', { user: user, drawbox: await db.getDrawboxById(req.user.id), title: 'Dashboard' });
 });
 
 app.get('/logout', (req, res) => {
@@ -250,10 +250,9 @@ app.post('/addEntry', async (req, res) => {
     try {
         await fs.ensureDir(userDir);
         const totalImages = await db.getDrawboxEntryCount(drawbox.id);
-        const newId = await db.addEntry(drawbox.id, `${totalImages + 1}.png`);
-        console.log(newId);
+        await db.addEntry(drawbox.id, `${totalImages + 1}.png`);
         const imageBuffer = Buffer.from(req.body.image.split(',')[1], 'base64');
-        const filename = (await newId + 1) + '.png';
+        const filename = (totalImages + 1) + '.png';
         const filePath = path.join(userDir, filename);
         await fs.writeFile(filePath, imageBuffer);
 

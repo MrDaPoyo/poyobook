@@ -147,7 +147,7 @@ app.get('/', userMiddleware, async (req, res) => {
     host = await host.split('.')[0];
     try {
         if (req.headers.host == process.env.HOST) {
-            res.render('index', { title: 'Free guestbooks for everyone :3' });
+            res.render('index', { title: 'Free drawboxes for everyone :3' });
         } else {
             var guestbook = await db.getGuestbookByUsername(host);
             guestbook.messages = await db.getMessages(guestbook.id);

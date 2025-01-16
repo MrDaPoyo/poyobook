@@ -7,6 +7,9 @@
 </form>
 <h2>Messages</h2>
 <ul>
+    <% if (guestbook.messages.length === 0) { %>
+        <li>No messages yet</li>
+    <% } %>
     <% guestbook.messages.forEach(function(message) { %>
         <li>
             <strong><%= message.name %>:</strong> <%= message.message %> <em>(<%= message.createdAt %>)</em>

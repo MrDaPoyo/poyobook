@@ -57,14 +57,14 @@ const userMiddleware = async (req, res, next) => {
     const token = req.cookies['authorization'];
     if (!token) {
         res.locals.user = null;
-        cookieParser.clearCookie('authorization');
+        res.clearCookie('authorization');
         next();
         return;
     }
     jwt.verify(token, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.locals.user = null;
-            cookieParser.clearCookie('authorization');
+            res.clearCookie('authorization');
             next();
         } else {
             res.locals.user = await db.getUserById(decoded.id);
@@ -118,6 +118,7 @@ app.get('/', userMiddleware, async (req, res) => {
             res.render('index', { title: 'Free guestbooks for everyone :3' });
         } else {
             var guestbook = await db.getGuestbookByUsername(host);
+            guestbook.messages = await db.getMessages(guestbook.id);
             if (guestbook) {
                 res.render('guestbook', { guestbook: guestbook, title: `${host}'s Guestbook!` });
             } else {

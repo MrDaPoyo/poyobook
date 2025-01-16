@@ -1,15 +1,36 @@
 <%- include('header') %>
     <p>Welcome, <%= user.username %>.</p>
     <strong>Guestbook available at <a href="https://<%= user.username %>.<%= env.HOST %>/">https://<%= user.username %>.<%= env.HOST %>/</a></strong>
-    <h3>Inbox</h3>
-    <% if (guestbook.messages.length == 0) { %>
-        <p>No messages, <i>yet</i>.</p>
-    <% } else { %>
-        <p>Messages:</p>
-        <% guestbook.messages.forEach(function(message) { %>
-            <li>
-                <strong><%= message.name %>:</strong> <%= message.message %> <em>(<%= message.createdAt %>)</em>
-            </li>
-        <% }); %>
-    <% } %>
+    <div class="row-container">
+        <div>
+            <h3>Inbox</h3>
+            <% if (guestbook.messages.length == 0) { %>
+                <p>No messages, <i>yet</i>.</p>
+            <% } else { %>
+                <p>Messages:</p>
+                <% guestbook.messages.forEach(function(message) { %>
+                    <li>
+                        <strong><%= message.name %>:</strong> <%= message.message %> <em>(<%= message.createdAt %>)</em>
+                    </li>
+                <% }); %>
+            <% } %>
+        </div>
+        <div>
+            <h3>Config</h3>
+            <form action="/setDomain" method="POST">
+                <label for="domain">Set Domain:</label>
+                <input type="text" id="domain" name="domain" required>
+                <button type="submit">Save</button>
+            </form>
+
+            <form action="/setModality" method="POST">
+                <label for="modality">Choose Guestbook Modality:</label>
+                <select id="modality" name="modality" required>
+                    <option value="guestbook">Guestbook</option>
+                    <option value="drawbox">Drawbox</option>
+                </select>
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    </div>
 <%- include('footer') %>

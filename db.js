@@ -1,7 +1,4 @@
 const sqlite3 = require('sqlite3').verbose();
-const { on } = require('events');
-const fs = require('fs');
-const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();

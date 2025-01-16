@@ -10,10 +10,19 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: 'pixelserif';
+    src: url(/fonts/PIXEARG_.ttf);
+}
+
 body {
     background-color: var(--primary);
     color: var(--secondary);
     font-family: 'easvhs', roboto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'pixelserif', roboto;
 }
 
 a {

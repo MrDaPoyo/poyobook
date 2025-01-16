@@ -149,15 +149,17 @@ app.get('/', userMiddleware, async (req, res) => {
         if (req.headers.host == process.env.HOST) {
             res.render('index', { title: 'Free drawboxes for everyone :3' });
         } else {
-            var guestbook = await db.getGuestbookByUsername(host);
-            guestbook.messages = await db.getMessages(guestbook.id);
-            if (guestbook) {
-                res.render('guestbook', { guestbook: guestbook, title: `${host}'s Guestbook!` });
+            var userId = await db.getUserIdByUsername(host);
+            var drawbox = await db.getDrawboxById(userId);
+            drawbox.images = await db.getDrawboxEntries(drawbox.id);
+            if (drawbox) {
+                res.render('drawbox', { drawbox: drawbox, title: `${host}'s Guestbook!` });
             } else {
-                res.status(404).send('Guestbook not found');
+                res.status(404).send('Drawbox not found :P');
             }
         }
     } catch (error) {
+        console.log(error);
         res.status(500).send('Internal Server Error');
     }
 });
@@ -207,7 +209,7 @@ app.post('/auth/register', async (req, res) => {
             const result = await db.createUser(username, email, await hashedPassword);
 
             if (result.success) {
-                fs.mkdirSync(path.join("users", username));
+                fs.ensureDirSync(path.join("users", username));
                 res.cookie('authorization', result.jwt, { httpOnly: true, secure: true });
                 res.redirect('/dashboard?message=Account created successfully! :3');
             } else {
@@ -223,7 +225,7 @@ app.post('/auth/register', async (req, res) => {
 
 app.get('/dashboard', loggedInMiddleware, async (req, res) => {
     const user = await db.getUserById(req.user.id);
-    res.render('dashboard', { user: user, title: 'Dashboard' });
+    res.render('dashboard', { user: user, drawbox: await db.getDrawboxById(user.id), title: 'Dashboard' });
 });
 
 app.get('/logout', (req, res) => {

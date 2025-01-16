@@ -169,6 +169,29 @@ function doesUserExist(id) {
     });
 }
 
+function getDrawboxById(id) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT * FROM drawboxes WHERE id = ?`;
+        db.get(query, [id], (err, row) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(row);
+        });
+    });
+}
+
+function getDrawboxEntries(drawboxId) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT * FROM images WHERE drawboxID = ?`;
+        db.all(query, [drawboxId], (err, rows) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(rows);
+        });
+    });
+}
 
 module.exports = {
     db,
@@ -178,5 +201,7 @@ module.exports = {
     getUserById,
     getUserIdByUsername,
     getUserCount,
-    doesUserExist
+    doesUserExist,
+    getDrawboxById,
+    getDrawboxEntries
 };

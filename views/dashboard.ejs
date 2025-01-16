@@ -1,7 +1,7 @@
 <%- include('header') %>
     <h1>Dashboard nya</h1>
     <p>Welcome, <%= user.username %>.</p>
-    <strong>Guestbook available at <a href="https://<%= user.username %>.<%= env.host %>/">https://<%= user.username %>.<%= env.host %>/</a></strong>
+    <strong>Guestbook available at <a href="https://<%= user.username %>.<%= env.HOST %>/">https://<%= user.username %>.<%= env.HOST %>/</a></strong>
     <h3>Inbox</h3>
     <% if (guestbook.messages.length == 0) { %>
         <p>No messages, <i>yet</i>.</p>

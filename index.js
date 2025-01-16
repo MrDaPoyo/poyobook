@@ -78,6 +78,7 @@ const loggedInMiddleware = async (req, res, next) => {
     }
     jwt.verify(token, process.env.AUTH_SECRET, (err, decoded) => {
         if (err) {
+            cookieParser.clearCookie('authorization');
             return { success: false };
         }
         req.user = decoded;

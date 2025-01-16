@@ -228,6 +228,33 @@ app.post('/addEntry', async (req, res) => {
     }
 });
 
+app.post('/setDomain', loggedInMiddleware, async (req, res) => {
+    const { domain } = req.body;
+    const userId = req.user.id;
+
+    try {
+        const query = `UPDATE guestbooks SET domain = ? WHERE userID = ?`;
+        await db.db.run(query, [domain, userId]);
+        res.redirect('/dashboard');
+    } catch (error) {
+        res.status(500).json({ error: error.message, success: false });
+    }
+});
+
+app.post('/setModality', loggedInMiddleware, async (req, res) => {
+    const { modality } = req.body;
+    const userId = req.user.id;
+
+    try {
+        const query = `UPDATE guestbooks SET modality = ? WHERE userID = ?`;
+        await db.db.run(query, [modality, userId]);
+        res.redirect('/dashboard');
+    } catch (error) {
+        res.status(500).json({ error: error.message, success: false });
+    }
+});
+
+
 fs.ensureDirSync('users');
 
 // Start the server

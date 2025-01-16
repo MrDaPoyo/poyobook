@@ -23,6 +23,7 @@ function setupDB() {
     verified BOOLEAN DEFAULT FALSE,
     apiKey TEXT DEFAULT NULL,
     tier INTEGER NOT NULL DEFAULT 0,
+    modality TEXT DEFAULT 'guestbook',
     admin INTEGER NOT NULL DEFAULT 0)`);
 
     // Create drawboxes table

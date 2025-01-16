@@ -25,7 +25,7 @@ function setupDB() {
     tier INTEGER NOT NULL DEFAULT 0,
     admin INTEGER NOT NULL DEFAULT 0)`);
 
-    // Create websites table
+    // Create drawboxes table
     db.run(`CREATE TABLE IF NOT EXISTS guestbooks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     userID INTEGER NOT NULL,
@@ -47,6 +47,28 @@ function setupDB() {
     message TEXT NOT NULL,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (guestbookID) REFERENCES guestbooks(id))`);
+    
+    // Create drawboxes table
+    db.run(`CREATE TABLE IF NOT EXISTS drawboxes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userID INTEGER NOT NULL,
+    name TEXT UNIQUE NOT NULL,
+    domain TEXT UNIQUE NOT NULL,
+    views INTEGER DEFAULT 0,
+    totalImages INTEGER DEFAULT 0,
+    tier INTEGER DEFAULT 1,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    lastUpdated DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userID) REFERENCES users(id))`);
+
+    // Create images table
+    db.run(`CREATE TABLE IF NOT EXISTS images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    drawboxID INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    url TEXT NOT NULL,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (drawboxID) REFERENCES drawboxes(id))`);
 }
 
 setupDB();

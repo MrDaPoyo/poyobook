@@ -101,11 +101,11 @@ app.get('/', userMiddleware, async (req, res) => {
     host = await host.split('.')[0];
     try {
         if (req.headers.host == process.env.HOST) {
-            res.render('index');
+            res.render('index', { title: 'Free guestbooks for everyone :3' });
         } else {
             var guestbook = await db.getGuestbookByUsername(host);
             if (guestbook) {
-                res.render('guestbook', { guestbook: guestbook });
+                res.render('guestbook', { guestbook: guestbook, title: `${host}'s Guestbook!` });
             } else {
                 res.status(404).send('Guestbook not found');
             }
@@ -116,7 +116,7 @@ app.get('/', userMiddleware, async (req, res) => {
 });
 
 app.get('/auth', notLoggedInMiddleware, (req, res) => {
-    res.render('auth');
+    res.render('auth', {title: 'Auth'});
 });
 
 app.post('/auth/login', async (req, res) => {
@@ -175,7 +175,7 @@ app.post('/auth/register', async (req, res) => {
 
 app.get('/dashboard', loggedInMiddleware, async (req, res) => {
     const user = await db.getUserById(req.user.id);
-    res.render('dashboard', { user: user, guestbook: await db.getGuestbookByUsername(user.username) });
+    res.render('dashboard', { user: user, guestbook: await db.getGuestbookByUsername(user.username), title: 'Dashboard' });
 });
 
 app.get('/logout', (req, res) => {

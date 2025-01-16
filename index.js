@@ -258,7 +258,8 @@ app.post('/addEntry', async (req, res) => {
 
         await sharp(filePath)
             .resize(200, 200)
-            .toFile(path.join(userDir, filename));
+            .toFile(path.join(userDir, "resized-" + filename));
+        await fs.rename(path.join(userDir, "resized-" + filename), path.join(userDir, filename));
         db.addEntry(drawbox.id, req.body.message, filename);
         res.status(200).json({ message: 'Image uploaded and resized successfully!' });
     } catch (error) {

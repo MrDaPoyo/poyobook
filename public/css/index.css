@@ -1,6 +1,8 @@
 :root {
     --primary: black;
     --secondary: #add8e6;
+    --message-background: red;
+    --message-text: var(--primary);
 }
 
 @font-face {
@@ -33,4 +35,10 @@ input, button {
     background-color: var(--primary);
     color: var(--secondary);
     border: 1px solid var(--secondary);
+}
+
+.message {
+    padding: 1vh;
+    background-color: var(--message-background);
+    color: var(--message-text);
 }

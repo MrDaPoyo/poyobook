@@ -160,6 +160,18 @@ function getUserIdByUsername(username) {
     });
 }
 
+function doesUserExist(id) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT COUNT(*) AS count FROM users WHERE id = ?`;
+        db.get(query, [id], (err, row) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(row.count > 0);
+        });
+    });
+}
+
 function getMessages(guestbookID) {
     return new Promise((resolve, reject) => {
         const query = `SELECT * FROM messages WHERE guestbookID = ?`;
@@ -215,6 +227,7 @@ module.exports = {
     getUserById,
     getUserIdByUsername,
     getUserCount,
+    doesUserExist,
     getMessages,
     getGuestbookByUsername,
     addEntry

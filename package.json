@@ -24,6 +24,7 @@
     "ejs": "^3.1.10",
     "events": "^3.3.0",
     "express": "^4.21.2",
+    "fs-extra": "^11.3.0",
     "ico": "^0.3.3",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.9.16",

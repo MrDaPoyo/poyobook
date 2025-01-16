@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 var db = require('./db');
+const fs = require('fs-extra');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
@@ -46,6 +47,7 @@ function checkGuestbookUsername(username) {
 
 const basicMiddleware = async (req, res, next) => {
     res.locals.env = process.env;
+    res.locals.message = req.query.message || null;
     next();
 }
 
@@ -55,6 +57,7 @@ const userMiddleware = async (req, res, next) => {
     const token = req.cookies['authorization'];
     if (!token) {
         res.locals.user = null;
+        cookieParser.clearCookie('authorization');
         next();
         return;
     }
@@ -63,10 +66,10 @@ const userMiddleware = async (req, res, next) => {
             res.locals.user = null;
             cookieParser.clearCookie('authorization');
             next();
-            return;
+        } else {
+            res.locals.user = await db.getUserById(decoded.id);
+            next();
         }
-        res.locals.user = await db.getUserById(decoded.id);
-        next();
     });
 }
 
@@ -81,6 +84,12 @@ const loggedInMiddleware = async (req, res, next) => {
             cookieParser.clearCookie('authorization');
             return { success: false };
         }
+        db.doesUserExist(decoded.id).then((exists) => {
+            if (!exists) {
+                res.redirect('/?message=Unauthorized');
+                return;
+            }
+        });
         req.user = decoded;
         res.locals.user = decoded;
         next();
@@ -90,8 +99,13 @@ const loggedInMiddleware = async (req, res, next) => {
 const notLoggedInMiddleware = async (req, res, next) => {
     const token = req.cookies['authorization'];
     if (token) {
-        res.redirect('/');
-        return;
+        jwt.verify(token, process.env.AUTH_SECRET, (err, decoded) => {  
+            if (err) {
+                cookieParser.clearCookie('authorization');
+                return { success: false };
+            }
+            res.locals.user = decoded;
+        });
     }
     next();
 }
@@ -160,22 +174,23 @@ app.post('/auth/register', async (req, res) => {
             const result = await db.createUser(username, email, await hashedPassword);
 
             if (result.success) {
+                fs.mkdirSync(path.join("users", username));
                 res.cookie('authorization', result.jwt, { httpOnly: true, secure: true });
-                res.status(201).json({ message: 'User registered successfully', jwt: result.jwt, success: result.success });
+                res.redirect('/dashboard?message=Account created successfully! :3');
             } else {
-                res.status(400).json({ error: result.message, success: result.success });
+                res.redirect('/auth/?message=' + result.error);
             }
         } catch (error) {
-            res.status(500).json({ error: error });
+            res.redirect('/auth/?message=' + result.error)
         }
     } else {
-        res.status(400).json({ error: 'Password must be at least 8 characters long', success: false });
+        res.redirect('/auth/?message=Password must be at least 8 characters long')
     }
 });
 
 app.get('/dashboard', loggedInMiddleware, async (req, res) => {
     const user = await db.getUserById(req.user.id);
-    res.render('dashboard', { user: user, guestbook: await db.getGuestbookByUsername(user.username), title: 'Dashboard' });
+    res.render('dashboard', { user: user, guestbook: await db.getGuestbookByUsername(await user.username), title: 'Dashboard' });
 });
 
 app.get('/logout', (req, res) => {
@@ -209,6 +224,8 @@ app.post('/addEntry', async (req, res) => {
         res.status(500).json({ error: error.message, success: false });
     }
 });
+
+fs.ensureDirSync('users');
 
 // Start the server
 app.listen(port, () => {

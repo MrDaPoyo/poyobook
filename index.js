@@ -65,18 +65,6 @@ function checkUsername(username) {
     }
 }
 
-function checkGuestbookUsername(username) {
-    const regex = /^[a-zA-Z0-9 ]+$/; // Regex to allow alphanumeric characters and spaces
-
-    if (username.length > 20) {
-        return 'Username must have at max 20 characters';
-    } else if (!regex.test(username)) {
-        return 'Username must contain only letters and numbers';
-    } else {
-        return true;
-    }
-}
-
 const basicMiddleware = async (req, res, next) => {
     res.locals.env = process.env;
     res.locals.message = req.query.message || null;
@@ -143,14 +131,12 @@ const notLoggedInMiddleware = async (req, res, next) => {
 }
 
 app.get('/', userMiddleware, async (req, res) => {
-    var host = req.headers.host;
-    host = await host.split('.')[0];
+    var host = req.headers.host.split(':')[0];
     try {
         if (req.headers.host == process.env.HOST) {
             res.render('index', { title: 'Free drawboxes for everyone :3' });
         } else {
-            var userId = await db.getUserIdByUsername(host);
-            var drawbox = await db.getDrawboxById(userId);
+            var drawbox = await db.getDrawboxByHost(host);
             drawbox.images = await db.getDrawboxEntries(drawbox.id);
             if (drawbox) {
                 res.render('drawbox', { drawbox: drawbox, title: `${host}'s Guestbook!` });
@@ -166,16 +152,22 @@ app.get('/', userMiddleware, async (req, res) => {
 
 app.get('/retrieveImage/:id', async (req, res) => {
     const host = req.headers.host;
-    const drawbox = await db.getDrawboxByUsername(host);
-
+    var userId = db.getUserIdByUsername(host)
+    const drawbox = await db.getDrawboxById(userId);
+    console.log(drawbox);
     if (!drawbox) {
         return res.status(404).json({ error: 'Drawbox not found', success: false });
     }
-
     const userDir = path.join('users', drawbox.username, 'images');
     const id = req.params.id;
     const filePath = path.join(userDir, id);
-    res.sendFile(filePath);
+
+    // Check if the file exists
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        res.status(404).json({ error: 'Image not found', success: false });
+    }
 });
 
 app.get('/auth', notLoggedInMiddleware, (req, res) => {

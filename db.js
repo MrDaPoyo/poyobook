@@ -152,7 +152,7 @@ function getUserIdByUsername(username) {
             if (err) {
                 reject(err);
             }
-            resolve(row.id);
+            resolve(row);
         });
     });
 }
@@ -193,6 +193,18 @@ function getDrawboxEntries(drawboxId) {
     });
 }
 
+function getDrawboxByHost(host) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT * FROM drawboxes WHERE domain = ?`;
+        db.get(query, [host], (err, row) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(row);
+        });
+    });
+}
+
 module.exports = {
     db,
     createUser,
@@ -203,5 +215,6 @@ module.exports = {
     getUserCount,
     doesUserExist,
     getDrawboxById,
-    getDrawboxEntries
+    getDrawboxEntries,
+    getDrawboxByHost
 };

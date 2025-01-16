@@ -35,6 +35,12 @@ input, button {
     background-color: var(--primary);
     color: var(--secondary);
     border: 1px solid var(--secondary);
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: var(--secondary);
+    color: var(--primary);
 }
 
 .message {

@@ -181,7 +181,7 @@ app.post('/auth/register', async (req, res) => {
                 res.redirect('/auth/?message=' + result.error);
             }
         } catch (error) {
-            res.redirect('/auth/?message=' + result.error)
+            res.redirect('/auth/?message=' + error.message)
         }
     } else {
         res.redirect('/auth/?message=Password must be at least 8 characters long')

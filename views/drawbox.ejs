@@ -26,24 +26,29 @@
             }
 
             document.getElementById('submitDrawing').addEventListener('click', () => {
-                const dataURL = canvas.toDataURL();
-                // You can now send dataURL to the server or handle it as needed
-                console.log(dataURL);
-                fetch('/addEntry', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ image: dataURL })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Success:', data);
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                    });
+                convertImage();
             });
+
+            function convertImage() {
+                var image = canvas.toDataURL("image/png");
+                sendMessage(image);
+            }
+
+            function sendMessage(image) {
+                var msg = JSON.stringify({ image: image });
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/addEntry', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(msg);
+                xhr.onload = function() {
+                    if (xhr.status == 200) {
+                        alert('File is saved');
+                    } else {
+                        console.error('Error:', xhr.statusText);
+                    }
+                };
+                window.location.reload();
+            }
         </script>
         <hr>
         <%- JSON.stringify(drawbox) %>

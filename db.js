@@ -41,7 +41,6 @@ function setupDB() {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     drawboxID INTEGER NOT NULL,
     name TEXT NOT NULL,
-    url TEXT NOT NULL,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (drawboxID) REFERENCES drawboxes(id))`);
 }
@@ -193,6 +192,18 @@ function getDrawboxEntries(drawboxId) {
     });
 }
 
+function getDrawboxEntryCount(drawboxId) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT COUNT(*) AS count FROM images WHERE drawboxID = ?`;
+        db.get(query, [drawboxId], (err, row) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(row.count);
+        });
+    });
+}
+
 function getDrawboxByHost(host) {
     return new Promise((resolve, reject) => {
         const query = `SELECT * FROM drawboxes WHERE domain = ?`;
@@ -201,6 +212,24 @@ function getDrawboxByHost(host) {
                 reject(err);
             }
             resolve(row);
+        });
+    });
+}
+
+function addEntry(drawboxID, name) {
+    return new Promise((resolve, reject) => {
+        const query = `INSERT INTO images (drawboxID, name) VALUES (?, ?)`;
+        db.run(query, [drawboxID, name || `${this.lastID + 1}.png`], function (err) {
+            if (err) {
+                return reject({ success: false, message: err.message });
+            }
+            const imageId = this.lastID;
+            db.run(`UPDATE drawboxes SET totalImages = totalImages + 1, lastUpdated = CURRENT_TIMESTAMP WHERE id = ?`, [drawboxID], (err) => {
+                if (err) {
+                    return reject({ success: false, message: err.message });
+                }
+                resolve({ success: true, id: imageId });
+            });
         });
     });
 }
@@ -216,5 +245,7 @@ module.exports = {
     doesUserExist,
     getDrawboxById,
     getDrawboxEntries,
-    getDrawboxByHost
+    getDrawboxByHost,
+    addEntry,
+    getDrawboxEntryCount
 };

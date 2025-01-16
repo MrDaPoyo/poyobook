@@ -151,14 +151,12 @@ app.get('/', userMiddleware, async (req, res) => {
 });
 
 app.get('/retrieveImage/:id', async (req, res) => {
-    const host = req.headers.host;
-    var userId = db.getUserIdByUsername(host)
-    const drawbox = await db.getDrawboxById(userId);
-    console.log(drawbox);
+    const host = req.headers.host.split(':')[0];
+    const drawbox = await db.getDrawboxByHost(host);
     if (!drawbox) {
         return res.status(404).json({ error: 'Drawbox not found', success: false });
     }
-    const userDir = path.join('users', drawbox.username, 'images');
+    const userDir = path.join('users', drawbox.name, 'images');
     const id = req.params.id;
     const filePath = path.join(userDir, id);
 
@@ -239,7 +237,7 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-app.post('/addEntry', drawboxUploadImage, async (req, res) => {
+app.post('/addEntry', async (req, res) => {
     const host = req.headers.host.split(':')[0];
     const drawbox = await db.getDrawboxByHost(host);
 
@@ -251,15 +249,21 @@ app.post('/addEntry', drawboxUploadImage, async (req, res) => {
 
     try {
         await fs.ensureDir(userDir);
-        const filePath = path.join(userDir, req.file.filename);
-        await fs.move(req.file.path, filePath);
+        const totalImages = await db.getDrawboxEntryCount(drawbox.id);
+        const newId = await db.addEntry(drawbox.id, `${totalImages + 1}.png`);
+        console.log(newId);
+        const imageBuffer = Buffer.from(req.body.image.split(',')[1], 'base64');
+        const filename = (await newId + 1) + '.png';
+        const filePath = path.join(userDir, filename);
+        await fs.writeFile(filePath, imageBuffer);
 
         await sharp(filePath)
-            .resize(100, 100)
-            .toFile(path.join(userDir, 'resized-' + req.file.filename));
-        db.addEntry(drawbox.id, req.body.message, req.file.filename);
+            .resize(200, 200)
+            .toFile(path.join(userDir, filename));
+        db.addEntry(drawbox.id, req.body.message, filename);
         res.status(200).json({ message: 'Image uploaded and resized successfully!' });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: error.message });
     }
 });

@@ -8,57 +8,79 @@
             const canvas = document.getElementById('drawCanvas');
             const ctx = canvas.getContext('2d');
             let drawing = false;
+            let drawingHistory = [];
+            
+            // Save initial blank state
+            saveState();
 
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mousemove', draw);
 
             function startDrawing() {
-                drawing = true;
-                ctx.beginPath(); // Start a new path when mouse is pressed
+            drawing = true;
+            ctx.beginPath();
             }
 
             function stopDrawing() {
-                drawing = false;
-                ctx.beginPath(); // Reset the path when mouse is released
+            drawing = false;
+            ctx.beginPath();
+            saveState(); // Save state after each stroke
             }
 
             function draw(event) {
-                if (!drawing) return;
-                ctx.lineWidth = 5;
-                ctx.lineCap = 'round';
-                ctx.strokeStyle = '#000000';
+            if (!drawing) return;
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000000';
 
-                ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            }
+
+            function saveState() {
+            drawingHistory.push(canvas.toDataURL());
+            }
+
+            function undo() {
+            if (drawingHistory.length > 1) {
+                drawingHistory.pop(); // Remove current state
+                let img = new Image();
+                img.src = drawingHistory[drawingHistory.length - 1];
+                img.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+                }
+            }
             }
 
             document.getElementById('submitDrawing').addEventListener('click', () => {
-                convertImage();
+            convertImage();
             });
 
+            document.getElementById('undoButton').addEventListener('click', undo);
+
             function convertImage() {
-                var image = canvas.toDataURL("image/png");
-                sendMessage(image);
+            var image = canvas.toDataURL("image/png");
+            sendMessage(image);
             }
 
             function sendMessage(image) {
-                var msg = JSON.stringify({ image: image });
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', '/addEntry', true);
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.send(msg);
-                xhr.onload = function() {
-                    if (xhr.status == 200) {
-                        alert('File is saved');
-                    } else {
-                        console.error('Error:', xhr.statusText);
-                    }
-                };
-                setTimeout(() => {}, 2000);
-                window.location.reload();
+            var msg = JSON.stringify({ image: image });
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/addEntry', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(msg);
+            xhr.onload = function() {
+                if (xhr.status == 200) {
+                alert('File is saved');
+                } else {
+                console.error('Error:', xhr.statusText);
+                }
+            };
+            setTimeout(() => {window.location.reload();}, 2000);
             }
         </script>
         <hr>

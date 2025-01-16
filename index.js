@@ -190,7 +190,9 @@ app.post('/auth/register', async (req, res) => {
 
 app.get('/dashboard', loggedInMiddleware, async (req, res) => {
     const user = await db.getUserById(req.user.id);
-    res.render('dashboard', { user: user, guestbook: await db.getGuestbookByUsername(await user.username), title: 'Dashboard' });
+    var guestbook = await db.getGuestbookByUsername(user.username);
+    guestbook.messages = await db.getMessages(guestbook.id);
+    res.render('dashboard', { user: user, guestbook: guestbook, title: 'Dashboard' });
 });
 
 app.get('/logout', (req, res) => {

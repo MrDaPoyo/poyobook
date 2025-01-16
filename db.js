@@ -191,18 +191,7 @@ function getGuestbookByUsername(username) {
             if (err) {
                 return reject(undefined);
             }
-            db.get(`UPDATE guestbooks SET views = views + 1 WHERE id = ?`, [row.id], (err) => {
-                if (err) {
-                    return reject(undefined);
-                }
-                getMessages(row.id).then(messages => {
-                    row.messages = messages;
-                    resolve(row);
-                }).catch(err => {
-                    return reject(err);
-                });
-            });
-            
+            resolve(row);
         });
     });
 }

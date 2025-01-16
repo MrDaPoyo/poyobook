@@ -240,14 +240,14 @@ app.get('/logout', (req, res) => {
 });
 
 app.post('/addEntry', drawboxUploadImage, async (req, res) => {
-    const host = req.headers.host;
-    const drawbox = await db.getDrawboxByUsername(host);
+    const host = req.headers.host.split(':')[0];
+    const drawbox = await db.getDrawboxByHost(host);
 
     if (!drawbox) {
         return res.status(404).json({ error: 'Drawbox gone poof! :P', success: false });
     }
 
-    const userDir = path.join('users', drawbox.username, 'images');
+    const userDir = path.join('users', drawbox.name, 'images');
 
     try {
         await fs.ensureDir(userDir);

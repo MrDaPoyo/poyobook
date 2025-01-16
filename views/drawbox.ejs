@@ -1,6 +1,50 @@
 <body>
     <div class="container">
         <h1><%- drawbox.name.charAt(0).toUpperCase() + drawbox.name.slice(1) %>'s' Draw Box!</h1>
+        <canvas id="drawCanvas" width="200" height="200" style="border:1px solid #000000;"></canvas>
+        <button id="submitDrawing">Submit Drawing</button>
+
+        <script>
+            const canvas = document.getElementById('drawCanvas');
+            const ctx = canvas.getContext('2d');
+            let drawing = false;
+
+            canvas.addEventListener('mousedown', () => drawing = true);
+            canvas.addEventListener('mouseup', () => drawing = false);
+            canvas.addEventListener('mousemove', draw);
+
+            function draw(event) {
+                if (!drawing) return;
+                ctx.lineWidth = 5;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#000000';
+
+                ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            }
+
+            document.getElementById('submitDrawing').addEventListener('click', () => {
+                const dataURL = canvas.toDataURL();
+                // You can now send dataURL to the server or handle it as needed
+                console.log(dataURL);
+                fetch('/addEntry', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ image: dataURL })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Success:', data);
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+            });
+        </script>
         <hr>
         <%- JSON.stringify(drawbox) %>
     </div>

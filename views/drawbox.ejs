@@ -9,9 +9,19 @@
             const ctx = canvas.getContext('2d');
             let drawing = false;
 
-            canvas.addEventListener('mousedown', () => drawing = true);
-            canvas.addEventListener('mouseup', () => drawing = false);
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mousemove', draw);
+
+            function startDrawing() {
+                drawing = true;
+                ctx.beginPath(); // Start a new path when mouse is pressed
+            }
+
+            function stopDrawing() {
+                drawing = false;
+                ctx.beginPath(); // Reset the path when mouse is released
+            }
 
             function draw(event) {
                 if (!drawing) return;

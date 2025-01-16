@@ -164,6 +164,20 @@ app.get('/', userMiddleware, async (req, res) => {
     }
 });
 
+app.get('/retrieveImage/:id', async (req, res) => {
+    const host = req.headers.host;
+    const drawbox = await db.getDrawboxByUsername(host);
+
+    if (!drawbox) {
+        return res.status(404).json({ error: 'Drawbox not found', success: false });
+    }
+
+    const userDir = path.join('users', drawbox.username, 'images');
+    const id = req.params.id;
+    const filePath = path.join(userDir, id);
+    res.sendFile(filePath);
+});
+
 app.get('/auth', notLoggedInMiddleware, (req, res) => {
     res.render('auth', {title: 'Auth'});
 });

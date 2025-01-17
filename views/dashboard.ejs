@@ -6,12 +6,30 @@
             <h3>Inbox</h3>
             <hr>
             <div class="drawing-container">
+                <% if (drawbox.images.length === 0) { %>
+                    <p id="no-entries">No purrs <i>yet</i>.</p>
+                    <script>
+                        const phrases = [
+                            "No purrs yet, but the cat's out of the bag!",
+                            "Still waiting for the first paw print!",
+                            "No doodles yet, but the canvas is ready!",
+                            "No scribbles yet, but the pen is poised!",
+                            "No sketches yet, but the paper is blank!",
+                            "Poyo was here",
+                            "No drawings yet, but in a little bit they'll be flowing in!",
+                        ];
+
+                        const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+                        document.getElementById('no-entries').innerHTML = randomPhrase;
+                    </script>
+                <% } %>
                 <% drawbox.images.reverse().forEach(image => { %>
                     <div class="image-container" style="max-width: 200px; margin: 10px; position: relative;">
                         <img src="/retrieveImage/<%= image.id %>?domain=<%= drawbox.domain %>" alt="Drawing" style="max-width: 200px;">
                         <button id="deleteButton" onclick="deleteImage('<%= image.id %>')" style="position: absolute; top: 1vh; right: 1vh;">X</button>
                     </div>
                 <% }); %>
+                
             </div>
         </div>
         <div>

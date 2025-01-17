@@ -32,7 +32,7 @@
                 
             </div>
         </div>
-        <div>
+        <div style="max-width: 30%;">
             <h3 style="margin: 0;">Config</h3>
             <hr>
             <form action="/setDomain" method="POST">
@@ -57,7 +57,19 @@
             <h4 style="margin-bottom:0;"><u>Custom Styles</u></h4>
             <form action="/setCustomStyles" method="POST">
                 <label for="customStyles">Custom CSS:</label>
-                <textarea id="customStyles" name="customStyles" style="width: 100%; height: 100px;"><%= customStyles %></textarea>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/css/css.min.js"></script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', (event) => {
+                        var editor = CodeMirror.fromTextArea(document.getElementById('customStyles'), {
+                            lineNumbers: true,
+                            mode: 'css',
+                            theme: 'default'
+                        });
+                    });
+                </script>
+                <textarea id="customStyles" name="customStyles" style="max-width: 100%; height: 20%;"><%= customStyles %></textarea>
                 <button type="submit">Save</button>
             </form>
         </div>

@@ -249,7 +249,7 @@ app.get('/logout', (req, res) => {
 app.post('/addEntry', async (req, res) => {
     const host = req.headers.host.split(':')[0];
     let drawbox;
-    if (host == process.env.HOST) {
+    if (host == process.env.CLEAN_HOST) {
         drawbox = await db.getDrawboxById(req.body.id);
     } else {
         drawbox = await db.getDrawboxByHost(host);

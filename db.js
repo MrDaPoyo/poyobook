@@ -70,7 +70,7 @@ function createUser(username, email, password) {
             const userId = this.lastID;
             console.log(`User created with ID: ${userId}`);
             const drawboxQuery = `INSERT INTO drawboxes (userID, name, domain) VALUES (?, ?, ?)`;
-            db.run(drawboxQuery, [userId, username, `${username}.${process.env.SHORT_HOST}`], function (err) {
+            db.run(drawboxQuery, [userId, username, `${username}.${process.env.CLEAN_HOST}`], function (err) {
                 if (err) {
                     return reject({ success: false, message: err.message });
                 }

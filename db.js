@@ -32,6 +32,8 @@ function setupDB() {
     views INTEGER DEFAULT 0,
     totalImages INTEGER DEFAULT 0,
     tier INTEGER DEFAULT 1,
+    imageBrushColor TEXT DEFAULT '#000000',
+    imageBackgroundColor TEXT DEFAULT '#FFFFFF',
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     lastUpdated DATETIME DEFAULT CURRENT_TIMESTAMP,
     captcha BOOLEAN DEFAULT TRUE,
@@ -235,6 +237,18 @@ function addEntry(drawboxID, name) {
     });
 }
 
+function changeDrawboxColor(drawboxID, backgroundColor, color) {
+    return new Promise((resolve, reject) => {
+        const query = `UPDATE drawboxes SET imageBackgroundColor = ?, imageBrushColor = ? WHERE id = ?`;
+        db.run(query, [backgroundColor, color, drawboxID], function (err) {
+            if (err) {
+                return reject({ success: false, message: err.message });
+            }
+            resolve({ success: true });
+        });
+    });
+}
+
 module.exports = {
     db,
     createUser,
@@ -248,5 +262,6 @@ module.exports = {
     getDrawboxEntries,
     getDrawboxByHost,
     addEntry,
-    getDrawboxEntryCount
+    getDrawboxEntryCount,
+    changeDrawboxColor
 };

@@ -66,7 +66,7 @@ const userMiddleware = async (req, res, next) => {
 const loggedInMiddleware = async (req, res, next) => {
     const token = req.cookies['authorization'];
     if (!token) {
-        res.status(401).json({ error: 'Unauthorized', success: false });
+        res.redirect('/?message=Unauthorized >8(');
         return;
     }
     jwt.verify(token, process.env.AUTH_SECRET, (err, decoded) => {
@@ -76,7 +76,8 @@ const loggedInMiddleware = async (req, res, next) => {
         }
         db.doesUserExist(decoded.id).then((exists) => {
             if (!exists) {
-                res.redirect('/?message=Unauthorized');
+                res.clearCookie('authorization');
+                res.redirect('/?message=Unauthorized >8(');
                 return;
             }
         });
@@ -213,7 +214,9 @@ app.post('/auth/register', async (req, res) => {
 
 app.get('/dashboard', loggedInMiddleware, async (req, res) => {
     const user = await db.getUserById(req.user.id);
-    res.render('dashboard', { user: user, drawbox: await db.getDrawboxById(req.user.id), title: 'Dashboard' });
+    var drawbox = await db.getDrawboxById(req.user.id);
+    drawbox.images = await db.getDrawboxEntries(await drawbox.id);
+    res.render('dashboard', { user: user, drawbox: drawbox, title: 'Dashboard' });
 });
 
 app.get('/logout', (req, res) => {
@@ -328,6 +331,18 @@ app.post('/setCaptcha', loggedInMiddleware, async (req, res) => {
         res.status(500).json({ error: error.message, success: false });
     }
 });
+
+app.post('/setColor', loggedInMiddleware, async (req, res) => {
+    const { color, backgroundColor } = req.body;
+    const userId = req.user.id;
+
+    try {
+        await db.changeDrawboxColor(userId, backgroundColor, color);
+        res.redirect('/dashboard?message=Color set successfully! :3');
+    } catch (error) {
+        res.status(500).json({ error: error.message, success: false });
+    }
+})
 
 fs.ensureDirSync('users');
 

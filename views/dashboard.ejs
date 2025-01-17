@@ -5,6 +5,12 @@
         <div>
             <h3>Inbox</h3>
             <hr>
+            <% drawbox.images.forEach(image=> { %>
+                <div class="image-container" style="max-width: 200px; margin: 10px; position: relative;">
+                    <img src="/retrieveImage/<%= image.id %>?domain=<%= drawbox.domain %>" alt="Drawing" style="max-width: 200px;">
+                    <button id="deleteButton" onclick="deleteImage('<%= image.id %>')" style="position: absolute; top: 1vh; right: 1vh;">X</button>
+                </div>
+            <% }); %>
         </div>
         <div>
             <h3 style="margin: 0;">Config</h3>
@@ -17,6 +23,13 @@
             <form action="/setCaptcha" method="POST">
                 <label for="captcha">Protect with Captcha:</label>
                 <input type="checkbox" id="captcha" name="captcha" <%= drawbox.captcha ? 'checked' : '' %>>
+                <button type="submit">Save</button>
+            </form>
+            <form action="/setColor" method="POST">
+                <label for="color">Text Color:</label>
+                <input type="color" id="color" name="color" value="<%= drawbox.color %>" required>
+                <label for="backgroundColor">Background Color:</label>
+                <input type="color" id="backgroundColor" name="backgroundColor" value="<%= drawbox.backgroundColor %>" required>
                 <button type="submit">Save</button>
             </form>
         </div>

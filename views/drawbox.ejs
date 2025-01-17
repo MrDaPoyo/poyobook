@@ -16,7 +16,9 @@
             let drawing = false;
             let drawingHistory = [];
 
-            // Save initial blank state
+            // Set canvas background to white
+            ctx.fillStyle = '<%= drawbox.imageBackgroundColor %>';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             saveState();
 
             canvas.addEventListener('mousedown', startDrawing);
@@ -38,7 +40,7 @@
                 if (!drawing) return;
                 ctx.lineWidth = 5;
                 ctx.lineCap = 'round';
-                ctx.strokeStyle = '#000000';
+                ctx.strokeStyle = '<%= drawbox.imageBrushColor %>';
 
                 ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
                 ctx.stroke();

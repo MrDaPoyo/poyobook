@@ -6,7 +6,7 @@
             <h3>Inbox</h3>
             <hr>
             <div class="drawing-container">
-                <% drawbox.images.forEach(image=> { %>
+                <% drawbox.images.reverse().forEach(image => { %>
                     <div class="image-container" style="max-width: 200px; margin: 10px; position: relative;">
                         <img src="/retrieveImage/<%= image.id %>?domain=<%= drawbox.domain %>" alt="Drawing" style="max-width: 200px;">
                         <button id="deleteButton" onclick="deleteImage('<%= image.id %>')" style="position: absolute; top: 1vh; right: 1vh;">X</button>

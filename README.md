@@ -1,6 +1,7 @@
 # poyobook
 ```
 HOST=localhost:3000
+CLEAN_HOST=localhost
 
 AUTH_SECRET=josajdlsjaldkajsldkasldkajsdjlakjsdlkasjdñlflfjalksfnjlqñfñlkwnlkñfnqwlñfnlñqfnlwfnkljwensfkjlnf
 

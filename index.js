@@ -250,7 +250,7 @@ app.post('/addEntry', async (req, res) => {
     const host = req.headers.host.split(':')[0];
     let drawbox;
     if (host == process.env.HOST) {
-        drawbox = await db.getDrawboxById(req.body.drawboxId);
+        drawbox = await db.getDrawboxById(req.body.id);
     } else {
         drawbox = await db.getDrawboxByHost(host);
     }

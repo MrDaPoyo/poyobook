@@ -27,9 +27,9 @@
             </form>
             <form action="/setColor" method="POST">
                 <label for="color">Text Color:</label>
-                <input type="color" id="color" name="color" value="<%= drawbox.color %>" required>
+                <input type="color" id="color" name="color" value="<%= drawbox.imageBrushColor %>" required>
                 <label for="backgroundColor">Background Color:</label>
-                <input type="color" id="backgroundColor" name="backgroundColor" value="<%= drawbox.backgroundColor %>" required>
+                <input type="color" id="backgroundColor" name="backgroundColor" value="<%= drawbox.imageBackgroundColor %>" required>
                 <button type="submit">Save</button>
             </form>
         </div>

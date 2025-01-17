@@ -55,3 +55,19 @@ button:hover {
     justify-content: space-around;
     flex-direction: row;
 }
+
+.inbox-container {
+    width: 50%;    
+}
+
+.drawing-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.drawing-container img {
+    background-color: grey;
+}

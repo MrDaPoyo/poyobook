@@ -275,8 +275,10 @@ app.post('/addEntry', async (req, res) => {
         return res.status(404).json({ error: 'Drawbox gone poof! :P', success: false });
     }
 
-    if (!verifyCaptcha(req, req.body.captchaToken, req.body.captchaAnswer)) {
-        return res.status(400).json({ error: 'Invalid captcha solution', success: false });
+    if (drawbox.captcha) {
+        if (!verifyCaptcha(req, req.body.captchaToken, req.body.captchaAnswer)) {
+            return res.status(400).json({ error: 'Invalid captcha solution', success: false });
+        }
     }
 
     const userDir = path.join('users', drawbox.name, 'images');
@@ -309,6 +311,19 @@ app.post('/setDomain', loggedInMiddleware, async (req, res) => {
         const query = `UPDATE drawboxes SET domain = ? WHERE userID = ?`;
         await db.db.run(query, [domain, userId]);
         res.redirect('/dashboard?message=Domain set successfully! :3');
+    } catch (error) {
+        res.status(500).json({ error: error.message, success: false });
+    }
+});
+
+app.post('/setCaptcha', loggedInMiddleware, async (req, res) => {
+    const { captcha } = req.body;
+    const userId = req.user.id;
+
+    try {
+        const query = `UPDATE drawboxes SET captcha = ? WHERE userID = ?`;
+        await db.db.run(query, [captcha, userId]);
+        res.redirect('/dashboard?message=Captcha set successfully! :3');
     } catch (error) {
         res.status(500).json({ error: error.message, success: false });
     }

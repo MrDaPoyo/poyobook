@@ -3,9 +3,11 @@
         <h1><%- drawbox.name.charAt(0).toUpperCase() + drawbox.name.slice(1) %>'s DrawBox!</h1>
         <canvas id="drawCanvas" width="200" height="200" style="border:1px solid #000000;"></canvas>
         <button id="undoButton">Undo</button>
-        <div id="captcha-container">
-            <script src="/js/captcha.js"></script>
-        </div>
+            <% if (drawbox.captcha) { %>
+                <div id="captcha-container">
+                    <script src="/js/captcha.js"></script>
+                </div>
+            <% } %>
         <button id="submitDrawing">Submit Drawing</button>
         </script>
         <script>
@@ -72,7 +74,15 @@
             }
 
             function sendMessage(image) {
-                var msg = JSON.stringify({ image: image, id: '<%= drawbox.id %>', captchaAnswer: document.getElementById('captchaAnswer').value, captchaToken: document.getElementById('captchaToken').value });
+                var msg = {
+                    image: image, 
+                    id: '<%= drawbox.id %>', 
+                }
+                <% if (drawbox.captcha) { %>
+                    msg.captchaAnswer = document.getElementById('captchaAnswer').value;
+                    msg.captchaToken = document.getElementById('captchaToken').value;
+                <% } %>
+                var msg = JSON.stringify(msg);
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', '/addEntry', true);
                 xhr.setRequestHeader('Content-Type', 'application/json');

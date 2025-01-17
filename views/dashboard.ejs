@@ -4,12 +4,19 @@
     <div class="row-container">
         <div>
             <h3>Inbox</h3>
+            <hr>
         </div>
         <div>
-            <h3>Config</h3>
+            <h3 style="margin: 0;">Config</h3>
+            <hr>
             <form action="/setDomain" method="POST">
                 <label for="domain">Set Domain:</label>
                 <input type="text" id="domain" name="domain" value="<%= drawbox.domain %>" required>
+                <button type="submit">Save</button>
+            </form>
+            <form action="/setCaptcha" method="POST">
+                <label for="captcha">Set Captcha:</label>
+                <input type="checkbox" id="captcha" name="captcha" <%= drawbox.captcha ? 'checked' : '' %>>
                 <button type="submit">Save</button>
             </form>
         </div>

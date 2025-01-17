@@ -34,6 +34,7 @@ function setupDB() {
     tier INTEGER DEFAULT 1,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     lastUpdated DATETIME DEFAULT CURRENT_TIMESTAMP,
+    captcha BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (userID) REFERENCES users(id))`);
 
     // Create images table

@@ -161,7 +161,12 @@ app.get('/drawbox/:drawboxId', async (req, res) => {
 
 app.get('/retrieveImage/:id', async (req, res) => {
     const host = req.headers.host.split(':')[0];
-    const drawbox = await db.getDrawboxByHost(host);
+    var drawbox;
+    if (host == process.env.CLEAN_HOST) {
+        drawbox = await db.getDrawboxById(req.params.id); 
+    } else {
+        drawbox = await db.getDrawboxByHost(host);
+    }
     if (!drawbox) {
         return res.status(404).json({ error: 'Drawbox not found', success: false });
     }

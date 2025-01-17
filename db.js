@@ -254,6 +254,18 @@ function deleteEntry(drawboxID, entryID) {
     });
 }
 
+function getEntry(guestbookId, entryId) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT * FROM images WHERE drawboxID = ? AND id = ?`;
+        db.get(query, [guestbookId, entryId], (err, row) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(row);
+        });
+    });
+}
+
 function changeDrawboxColor(drawboxID, backgroundColor, color) {
     return new Promise((resolve, reject) => {
         const query = `UPDATE drawboxes SET imageBackgroundColor = ?, imageBrushColor = ? WHERE id = ?`;
@@ -281,5 +293,6 @@ module.exports = {
     addEntry,
     deleteEntry,
     getDrawboxEntryCount,
-    changeDrawboxColor
+    changeDrawboxColor,
+    getEntry
 };

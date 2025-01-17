@@ -110,7 +110,7 @@ app.get('/', userMiddleware, async (req, res) => {
             var drawbox = await db.getDrawboxByHost(host);
             drawbox.images = await db.getDrawboxEntries(drawbox.id);
             if (drawbox) {
-                res.render('drawbox', { drawbox: drawbox, title: `${host}'s Guestbook!` });
+                res.render('drawbox', { drawbox: drawbox, title: `${drawbox.name}'s Guestbook!` });
             } else {
                 res.status(404).send('Drawbox not found :P');
             }
@@ -143,7 +143,8 @@ app.get('/retrieveImage/:id', async (req, res) => {
     }
     const userDir = path.join('users', drawbox.name, 'images');
     const id = req.params.id;
-    const filePath = path.join(userDir, `${id}.png`);
+    var image = await db.getEntry(drawbox.id, id);
+    const filePath = path.join(userDir, image.name);
 
     // Check if the file exists
     if (fs.existsSync(filePath)) {
@@ -166,7 +167,7 @@ app.post('/auth/login', async (req, res) => {
         try {
             const result = await db.loginUser(email, password);
             if (result.success) {
-                res.cookie('authorization', result.jwt, { httpOnly: true, secure: true });
+                res.cookie('authorization', result.jwt, { httpOnly: true, secure: true, domain: process.env.CLEAN_HOST });
                 res.redirect('/dashboard');
             } else {
                 res.status(400).json({ error: result.message, success: result.success });

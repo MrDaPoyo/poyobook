@@ -45,11 +45,19 @@
                 <input type="checkbox" id="captcha" name="captcha" <%= drawbox.captcha ? 'checked' : '' %>>
                 <button type="submit">Save</button>
             </form>
+            <h3 style="margin-bottom: 0;">Customization</h3>
+            <hr>
             <form action="/setColor" method="POST">
                 <label for="color">Text Color:</label>
                 <input type="color" id="color" name="color" value="<%= drawbox.imageBrushColor %>" required>
                 <label for="backgroundColor">Background Color:</label>
                 <input type="color" id="backgroundColor" name="backgroundColor" value="<%= drawbox.imageBackgroundColor %>" required>
+                <button type="submit">Save</button>
+            </form>
+            <h4 style="margin-bottom:0;"><u>Custom Styles</u></h4>
+            <form action="/setCustomStyles" method="POST">
+                <label for="customStyles">Custom CSS:</label>
+                <textarea id="customStyles" name="customStyles" style="width: 100%; height: 100px;"><%= drawbox.customStyles %></textarea>
                 <button type="submit">Save</button>
             </form>
         </div>

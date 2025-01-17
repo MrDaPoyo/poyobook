@@ -63,6 +63,14 @@ const userMiddleware = async (req, res, next) => {
     });
 }
 
+const sameSiteMiddleware = async (req, res, next) => {
+    if (req.host != process.env.CLEAN_HOST) {
+        res.redirect('/?message=Unauthorized >P');
+        return;
+    }
+    next();
+}
+
 const loggedInMiddleware = async (req, res, next) => {
     const token = req.cookies['authorization'];
     if (!token) {
@@ -121,7 +129,7 @@ app.get('/', userMiddleware, async (req, res) => {
     }
 });
 
-app.get('/drawbox/:drawboxId', userMiddleware, async (req, res) => {
+app.get('/drawbox/:drawboxId', userMiddleware, loggedInMiddleware, async (req, res) => {
     const drawbox = await db.getDrawboxById(req.params.drawboxId);
     if (!drawbox) {
         return res.status(404).json({ error: 'Drawbox not found', success: false });
@@ -154,11 +162,11 @@ app.get('/retrieveImage/:id', async (req, res) => {
     }
 });
 
-app.get('/auth', notLoggedInMiddleware, (req, res) => {
+app.get('/auth', sameSiteMiddleware, notLoggedInMiddleware, (req, res) => {
     res.render('auth', {title: 'Auth'});
 });
 
-app.post('/auth/login', async (req, res) => {
+app.post('/auth/login', sameSiteMiddleware, notLoggedInMiddleware, async (req, res) => {
     const { email, password } = req.body;
     if ((!email) || !password) {
         res.status(400).json({ error: 'Missing required fields', success: false });
@@ -178,7 +186,7 @@ app.post('/auth/login', async (req, res) => {
     }
 });
 
-app.post('/auth/register', async (req, res) => {
+app.post('/auth/register', notLoggedInMiddleware, async (req, res) => {
     var { username, email, password } = await req.body;
     if (!username || !email || !password) {
         return res.status(400).json({ error: 'Missing required fields', success: false });
@@ -213,14 +221,14 @@ app.post('/auth/register', async (req, res) => {
     }
 });
 
-app.get('/dashboard', loggedInMiddleware, async (req, res) => {
+app.get('/dashboard', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
     const user = await db.getUserById(req.user.id);
     var drawbox = await db.getDrawboxById(req.user.id);
     drawbox.images = await db.getDrawboxEntries(await drawbox.id);
     res.render('dashboard', { user: user, drawbox: drawbox, title: 'Dashboard' });
 });
 
-app.get('/logout', (req, res) => {
+app.get('/logout', sameSiteMiddleware, loggedInMiddleware, (req, res) => {
     res.clearCookie('authorization');
     res.redirect('/');
 });
@@ -317,8 +325,10 @@ app.delete('/deleteImage/:id', loggedInMiddleware, async (req, res) => {
             return res.status(404).json({ error: 'Drawbox not found', success: false });
         }
 
+        var image = await db.getEntry(drawbox.id, id);
+
         const userDir = path.join('users', drawbox.name, 'images');
-        const filePath = path.join(userDir, `${id}.png`);
+        const filePath = path.join(userDir, image.name);
 
         if (fs.existsSync(filePath)) {
             await fs.remove(filePath);
@@ -333,7 +343,7 @@ app.delete('/deleteImage/:id', loggedInMiddleware, async (req, res) => {
     }
 });
 
-app.post('/setDomain', loggedInMiddleware, async (req, res) => {
+app.post('/setDomain', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
     const { domain } = req.body;
     const userId = req.user.id;
 
@@ -346,7 +356,7 @@ app.post('/setDomain', loggedInMiddleware, async (req, res) => {
     }
 });
 
-app.post('/setCaptcha', loggedInMiddleware, async (req, res) => {
+app.post('/setCaptcha', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
     const { captcha } = req.body;
     const userId = req.user.id;
 
@@ -359,7 +369,7 @@ app.post('/setCaptcha', loggedInMiddleware, async (req, res) => {
     }
 });
 
-app.post('/setColor', loggedInMiddleware, async (req, res) => {
+app.post('/setColor', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
     const { color, backgroundColor } = req.body;
     const userId = req.user.id;
 
@@ -370,6 +380,20 @@ app.post('/setColor', loggedInMiddleware, async (req, res) => {
         res.status(500).json({ error: error.message, success: false });
     }
 })
+
+app.post('/setCSS', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
+    const { css } = req.body;
+    const user = req.user;
+
+    try {
+        const userDir = path.join('users', user.username, 'css');
+        await fs.ensureDir(userDir);
+        await fs.writeFile(path.join(userDir, 'index.css'), css);
+        res.redirect('/dashboard?message=CSS updated successfully! :3');
+    } catch (error) {
+        res.status(500).json({ error: error.message, success: false });
+    }
+});
 
 fs.ensureDirSync('users');
 

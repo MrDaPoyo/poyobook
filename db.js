@@ -237,6 +237,23 @@ function addEntry(drawboxID, name) {
     });
 }
 
+function deleteEntry(drawboxID, entryID) {
+    return new Promise((resolve, reject) => {
+        const query = `DELETE FROM images WHERE drawboxID = ? AND id = ?`;
+        db.run(query, [drawboxID, entryID], function (err) {
+            if (err) {
+                return reject({ success: false, message: err.message });
+            }
+            db.run(`UPDATE drawboxes SET totalImages = totalImages - 1, lastUpdated = CURRENT_TIMESTAMP WHERE id = ?`, [drawboxID], (err) => {
+                if (err) {
+                    return reject({ success: false, message: err.message });
+                }
+                resolve({ success: true });
+            });
+        });
+    });
+}
+
 function changeDrawboxColor(drawboxID, backgroundColor, color) {
     return new Promise((resolve, reject) => {
         const query = `UPDATE drawboxes SET imageBackgroundColor = ?, imageBrushColor = ? WHERE id = ?`;
@@ -262,6 +279,7 @@ module.exports = {
     getDrawboxEntries,
     getDrawboxByHost,
     addEntry,
+    deleteEntry,
     getDrawboxEntryCount,
     changeDrawboxColor
 };

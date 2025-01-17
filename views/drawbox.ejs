@@ -104,9 +104,25 @@
             <% drawbox.images.forEach(image=> { %>
                 <div class="image-container" style="max-width: 200px; margin: 10px; position: relative;">
                     <img src="/retrieveImage/<%= image.id %>?domain=<%= drawbox.domain %>" alt="Drawing" style="max-width: 200px;">
-                    <button id="deleteButton" onclick="deleteImage('<%= image.id %>')" style="position: absolute; top: 1vh; right: 1vh;">X</button>
+                    <% if (user && drawbox.name == user.username) { %>
+                        <button id="deleteButton" onclick="deleteImage('<%= image.id %>')" style="position: absolute; top: 1vh; right: 1vh;">X</button>
+                    <% } %>
                 </div>
             <% }); %>
+            <% if (user && drawbox.name == user.username) { %>
+                <script type="text/javascript">
+                    function deleteImage(id) {
+                        fetch('/deleteImage/' + id, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        }).then(() => {
+                            location.reload();
+                        });
+                    }
+                </script>
+            <% } %>
         </div>
     </div>
 </body>

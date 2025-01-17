@@ -35,5 +35,17 @@
                 <button type="submit">Save</button>
             </form>
         </div>
+        <script type="text/javascript">
+            function deleteImage(id) {
+                fetch('/deleteImage/' + id, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(() => {
+                    location.reload();
+                });
+            }
+        </script>
     </div>
 <%- include('footer') %>

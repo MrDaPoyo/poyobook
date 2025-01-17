@@ -306,6 +306,32 @@ app.post('/addEntry', async (req, res) => {
     }
 });
 
+app.delete('/deleteImage/:id', loggedInMiddleware, async (req, res) => {
+    const { id } = req.params;
+    const user = req.user;
+
+    try {
+        const drawbox = await db.getDrawboxById(user.id);
+        if (!drawbox) {
+            return res.status(404).json({ error: 'Drawbox not found', success: false });
+        }
+
+        const userDir = path.join('users', drawbox.name, 'images');
+        const filePath = path.join(userDir, `${id}.png`);
+
+        if (fs.existsSync(filePath)) {
+            await fs.remove(filePath);
+            await db.deleteEntry(drawbox.id, id);
+            res.status(200).json({ message: 'Image deleted successfully!', success: true });
+        } else {
+            res.status(404).json({ error: 'Image not found', success: false });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message, success: false });
+    }
+});
+
 app.post('/setDomain', loggedInMiddleware, async (req, res) => {
     const { domain } = req.body;
     const userId = req.user.id;

@@ -133,7 +133,6 @@ app.get('/retrieveImage/:id', async (req, res) => {
     const host = req.headers.host.split(':')[0];
     var drawbox;
     if (host == process.env.CLEAN_HOST) {
-        console.log(req.query.domain);
         drawbox = await db.getDrawboxByHost(req.query.domain); 
     } else {
         drawbox = await db.getDrawboxByHost(host);
@@ -222,6 +221,25 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
+function verifyCaptcha(req, token, solution) {
+    const ip = req.ip;
+    if (!captchaSolutions[ip]) {
+        return false;
+    }
+    const index = captchaSolutions[ip].findIndex(captcha => captcha.token === token);
+    if (index === -1) {
+        return false;
+    }
+    const captcha = captchaSolutions[ip][index];
+    if (captcha.solution === solution) {
+        captchaSolutions[ip].splice(index, 1);
+        console.log("Passed Captcha");
+        return true;
+    }
+    console.log("Failed Captcha");
+    return false;
+}
+
 app.post('/addEntry', async (req, res) => {
     const host = req.headers.host.split(':')[0];
     let drawbox;
@@ -232,6 +250,10 @@ app.post('/addEntry', async (req, res) => {
     }
     if (!drawbox) {
         return res.status(404).json({ error: 'Drawbox gone poof! :P', success: false });
+    }
+
+    if (!verifyCaptcha(req, req.body.captchaToken, req.body.captchaSolution)) {
+        return res.status(400).json({ error: 'Invalid captcha solution', success: false });
     }
 
     const userDir = path.join('users', drawbox.name, 'images');

@@ -71,6 +71,7 @@
                 var msg = JSON.stringify({ image: image });
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', '/addEntry', true);
+                xhr.setRequestHeader('drawboxId', '<%= drawbox.id %>');
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.send(msg);
                 xhr.onload = function () {

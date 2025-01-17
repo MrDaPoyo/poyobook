@@ -150,6 +150,15 @@ app.get('/', userMiddleware, async (req, res) => {
     }
 });
 
+app.get('/drawbox/:drawboxId', async (req, res) => {
+    const drawbox = await db.getDrawboxById(req.params.drawboxId);
+    if (!drawbox) {
+        return res.status(404).json({ error: 'Drawbox not found', success: false });
+    }
+    drawbox.images = await db.getDrawboxEntries(drawbox.id);
+    res.render('drawbox', { drawbox: drawbox, title: `${drawbox.name}'s Guestbook!` });
+});
+
 app.get('/retrieveImage/:id', async (req, res) => {
     const host = req.headers.host.split(':')[0];
     const drawbox = await db.getDrawboxByHost(host);
@@ -239,8 +248,12 @@ app.get('/logout', (req, res) => {
 
 app.post('/addEntry', async (req, res) => {
     const host = req.headers.host.split(':')[0];
-    const drawbox = await db.getDrawboxByHost(host);
-
+    let drawbox;
+    if (host == process.env.HOST) {
+        drawbox = await db.getDrawboxById(req.body.drawboxId);
+    } else {
+        drawbox = await db.getDrawboxByHost(host);
+    }
     if (!drawbox) {
         return res.status(404).json({ error: 'Drawbox gone poof! :P', success: false });
     }

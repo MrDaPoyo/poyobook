@@ -64,7 +64,7 @@ const userMiddleware = async (req, res, next) => {
 }
 
 const sameSiteMiddleware = async (req, res, next) => {
-    if (req.host != process.env.CLEAN_HOST) {
+    if (req.hostname != process.env.CLEAN_HOST) {
         res.redirect('/?message=Unauthorized >P');
         return;
     }
@@ -113,19 +113,19 @@ app.get('/', userMiddleware, async (req, res) => {
     var host = req.headers.host.split(':')[0];
     try {
         if (req.headers.host == process.env.HOST) {
-            res.render('index', { title: 'Free drawboxes for everyone :3' });
+            return res.render('index', { title: 'Free drawboxes for everyone :3' });
         } else {
             var drawbox = await db.getDrawboxByHost(host);
             drawbox.images = await db.getDrawboxEntries(drawbox.id);
             if (drawbox) {
-                res.render('drawbox', { drawbox: drawbox, title: `${drawbox.name}'s Guestbook!` });
+                return res.render('drawbox', { drawbox: drawbox, title: `${drawbox.name}'s Guestbook!` });
             } else {
-                res.status(404).send('Drawbox not found :P');
+                return res.status(404).send('Drawbox not found :P');
             }
         }
     } catch (error) {
         console.log(error);
-        res.status(500).send('Internal Server Error');
+        return res.status(500).send('Internal Server Error');
     }
 });
 
@@ -226,7 +226,8 @@ app.get('/dashboard', sameSiteMiddleware, loggedInMiddleware, async (req, res) =
     const user = await db.getUserById(req.user.id);
     var drawbox = await db.getDrawboxById(req.user.id);
     drawbox.images = await db.getDrawboxEntries(await drawbox.id);
-    res.render('dashboard', { user: user, drawbox: drawbox, title: 'Dashboard' });
+    var customStyles = fs.readFileSync(path.join('users', drawbox.name, 'css', 'index.css'), 'utf8');
+    res.render('dashboard', { user: user, drawbox: drawbox, title: 'Dashboard', customStyles: customStyles });
 });
 
 app.get('/logout', sameSiteMiddleware, loggedInMiddleware, (req, res) => {
@@ -382,14 +383,12 @@ app.post('/setColor', sameSiteMiddleware, loggedInMiddleware, async (req, res) =
     }
 })
 
-app.post('/setCSS', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
-    const { css } = req.body;
-    const user = req.user;
-
+app.post('/setCustomStyles', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
+    const { customStyles } = req.body;
+    const user = await db.getUserById(req.user.id);
     try {
         const userDir = path.join('users', user.username, 'css');
-        await fs.ensureDir(userDir);
-        await fs.writeFile(path.join(userDir, 'index.css'), css);
+        await fs.writeFile(path.join(userDir, 'index.css'), customStyles);
         res.redirect('/dashboard?message=CSS updated successfully! :3');
     } catch (error) {
         res.status(500).json({ error: error.message, success: false });

@@ -207,7 +207,8 @@ app.post('/auth/register', notLoggedInMiddleware, async (req, res) => {
             const result = await db.createUser(username, email, await hashedPassword);
 
             if (result.success) {
-                fs.ensureDirSync(path.join("users", username));
+                fs.ensureDirSync(path.join("users", username, "css"));
+                fs.writeFileSync(path.join("users", username, "css", "index.css"), `/* Your CSS goes here! */`);
                 res.cookie('authorization', result.jwt, { httpOnly: true, secure: true });
                 res.redirect('/dashboard?message=Account created successfully! :3');
             } else {

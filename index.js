@@ -387,10 +387,14 @@ app.post('/setCustomStyles', sameSiteMiddleware, loggedInMiddleware, async (req,
     const { customStyles } = req.body;
     const user = await db.getUserById(req.user.id);
     try {
+        const cssSize = Buffer.byteLength(customStyles, 'utf8');
+        if (cssSize > 5 * 1024) {
+            return res.status(400).json({ error: "CSS exceeds 5KB limit. Try making your CSS smaller! We're sorry. :D", success: false });
+        }
         const userDir = path.join('users', user.username, 'css');
         await fs.writeFile(path.join(userDir, 'index.css'), customStyles);
         res.redirect('/dashboard?message=CSS updated successfully! :3');
-    } catch (error) {
+        } catch (error) {
         res.status(500).json({ error: error.message, success: false });
     }
 });

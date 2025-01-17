@@ -5,37 +5,7 @@ var db = require('./db');
 const fs = require('fs-extra');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
-const multer = require('multer');
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
-
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-        const ext = path.extname(file.originalname).toLowerCase();
-        if (ext === '.jpg' || ext === '.jpeg' || ext === '.png' || ext === '.gif') {
-            cb(null, true);
-        } else {
-            cb(new Error('Not a valid image extension! Please upload a .jpg, .jpeg, .png, or .gif file.'), false);
-        }
-    } else {
-        cb(new Error('Not an image! Please upload an image.'), false);
-    }
-};
-
-const drawboxUploadImage = multer({
-    storage: storage,
-    fileFilter: fileFilter,
-    limits: {
-        fileSize: 10 * 1024
-    }
-}).single('image');
 
 const app = express();
 const port = 3000;
@@ -150,7 +120,7 @@ app.get('/', userMiddleware, async (req, res) => {
     }
 });
 
-app.get('/drawbox/:drawboxId', async (req, res) => {
+app.get('/drawbox/:drawboxId', userMiddleware, async (req, res) => {
     const drawbox = await db.getDrawboxById(req.params.drawboxId);
     if (!drawbox) {
         return res.status(404).json({ error: 'Drawbox not found', success: false });
@@ -297,6 +267,29 @@ app.post('/setDomain', loggedInMiddleware, async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message, success: false });
     }
+});
+
+var captchaSolutions = {};
+
+app.get('/captcha', async (req, res) => {
+    const ip = req.ip;
+    if (!captchaSolutions[ip]) {
+        captchaSolutions[ip] = [];
+    }
+
+    if (captchaSolutions[ip].length >= 10) {
+        captchaSolutions[ip].shift(); // Remove the oldest token if the cap is reached
+    }
+
+    const token = Math.random().toString(36).substring(2);
+    const x = Math.floor(Math.random() * 10);
+    const y = Math.floor(Math.random() * 10);
+    const question = `${x} + ${y}`;
+    const solution = (x + y).toString();
+    captchaSolutions[ip].push({ token, solution });
+
+    const captcha = { token, question };
+    res.json(captcha);
 });
 
 fs.ensureDirSync('users');

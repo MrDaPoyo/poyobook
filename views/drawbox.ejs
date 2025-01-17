@@ -3,7 +3,9 @@
         <h1><%- drawbox.name.charAt(0).toUpperCase() + drawbox.name.slice(1) %>'s' DrawBox!</h1>
         <canvas id="drawCanvas" width="200" height="200" style="border:1px solid #000000;"></canvas>
         <button id="submitDrawing">Submit Drawing</button>
-
+        <script src="/js/captcha.js">
+            
+        </script>
         <script>
             const canvas = document.getElementById('drawCanvas');
             const ctx = canvas.getContext('2d');
@@ -86,8 +88,11 @@
         <hr>
         <div class="image-gallery">
             <% drawbox.images.forEach(image=> { %>
-                <img src="/retrieveImage/<%= image.id %>?domain=<%= drawbox.domain %>" alt="Drawing" style="max-width: 200px; margin: 10px;">
-                <% }); %>
+                <div class="image-container" style="max-width: 200px; margin: 10px; position: relative;">
+                    <img src="/retrieveImage/<%= image.id %>?domain=<%= drawbox.domain %>" alt="Drawing" style="max-width: 200px;">
+                    <button id="deleteButton" onclick="deleteImage('<%= image.id %>')" style="position: absolute; top: 1vh; right: 1vh;">X</button>
+                </div>
+            <% }); %>
         </div>
     </div>
 </body>

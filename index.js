@@ -163,7 +163,8 @@ app.get('/retrieveImage/:id', async (req, res) => {
     const host = req.headers.host.split(':')[0];
     var drawbox;
     if (host == process.env.CLEAN_HOST) {
-        drawbox = await db.getDrawboxById(req.params.id); 
+        console.log(req.query.domain);
+        drawbox = await db.getDrawboxByHost(req.query.domain); 
     } else {
         drawbox = await db.getDrawboxByHost(host);
     }
@@ -278,7 +279,6 @@ app.post('/addEntry', async (req, res) => {
             .resize(200, 200)
             .toFile(path.join(userDir, "resized-" + filename));
         await fs.rename(path.join(userDir, "resized-" + filename), path.join(userDir, filename));
-        db.addEntry(drawbox.id, req.body.message, filename);
         res.status(200).json({ message: 'Image uploaded and resized successfully!' });
     } catch (error) {
         console.log(error);

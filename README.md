@@ -13,8 +13,6 @@
 <h2>Project Screenshots:</h2>
 
 <img src="https://cloud-6bk0h8rd6-hack-club-bot.vercel.app/0image.png" alt="project-screenshot" width="400" height="400/">
-
-  
   
 <h2>🧐 Features</h2>
 

@@ -241,12 +241,15 @@ body {
     padding: 8px;
     border: 2px outset #ffffff;
 }
+.image-name {
+  margin: 0;
+  padding: 0;
+}
 #deleteButton {
     background-color: #ff0000;
     color: #ffffff;
     border: 2px outset #ff0000;
     padding: 1px;
-    padding: auto;
     cursor: pointer;
     font-family: "pixelserif", Courier, monospace;
 }

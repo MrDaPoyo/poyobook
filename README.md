@@ -8,7 +8,7 @@
 
 <h2>🚀 Demo</h2>
 
-[https://poyobox.org/](https://poyobox.org/)
+[https://poyobox.net/](https://poyobox.net/)
 
 <h2>Project Screenshots:</h2>
 

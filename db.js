@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 // Create a new database file if it doesn't exist
-const db = new sqlite3.Database('./poyobook.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+const db = new sqlite3.Database('./poyobox.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) {
         console.error(err.message);
     }

@@ -3,7 +3,7 @@
     <strong>Drawbox available at <a href="https://<%= drawbox.domain %>/">https://<%= drawbox.domain %>/</a></strong>
     <div class="row-container">
         <div class="inbox-container">
-            <h3>Inbox</h3>
+            <h3 style="margin: 0;">Inbox</h3>
             <hr>
             <div class="drawing-container">
                 <% if (drawbox.images.length === 0) { %>
@@ -32,27 +32,32 @@
                 
             </div>
         </div>
-        <div style="max-width: 30%;">
+        <div class="config-container" style="max-width: 30%;">
             <h3 style="margin: 0;">Config</h3>
             <hr>
-            <form action="/setDomain" method="POST">
+            <form action="/setConfig" method="POST">
                 <label for="domain">Set Domain:</label>
                 <input type="text" id="domain" name="domain" value="<%= drawbox.domain %>" required>
-                <button type="submit">Save</button>
-            </form>
-            <form action="/setCaptcha" method="POST">
-                <label for="captcha">Protect with Captcha:</label>
+                <br>
+                <label for="captcha">Protect DrawBox with Captcha:</label>
                 <input type="checkbox" id="captcha" name="captcha" <%= drawbox.captcha ? 'checked' : '' %>>
-                <button type="submit">Save</button>
-            </form>
-            <h3 style="margin-bottom: 0;">Customization</h3>
-            <hr>
-            <form action="/setColor" method="POST">
+                
+                <h3 style="margin-bottom: 0;">Customization</h3>
+                <hr>
+                
                 <label for="color">Text Color:</label>
                 <input type="color" id="color" name="color" value="<%= drawbox.imageBrushColor %>" required>
+                
                 <label for="backgroundColor">Background Color:</label>
                 <input type="color" id="backgroundColor" name="backgroundColor" value="<%= drawbox.imageBackgroundColor %>" required>
-                <button type="submit">Save</button>
+                <br>
+                <label for="creators">Enable Usernames?</label>
+                <input type="checkbox" id="creators" name="creators" <%= drawbox.usernames ? 'checked' : '' %>>
+                
+                <label for="descriptions" id="descriptions">Enable Messages (on entries)?</label>
+                <input type="checkbox" id="descriptions" name="descriptions" <%= drawbox.descriptions ? 'checked' : '' %>>
+                <br>
+                <input type="submit">
             </form>
             <h4 style="margin-bottom:0;"><u>Custom Styles</u></h4>
             <form action="/setCustomStyles" method="POST">

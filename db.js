@@ -35,6 +35,8 @@ function setupDB() {
     imageBrushColor TEXT DEFAULT '#000000',
     imageBackgroundColor TEXT DEFAULT '#FFFFFF',
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usernames BOOLEAN DEFAULT TRUE,
+    descriptions BOOLEAN DEFAULT TRUE,
     lastUpdated DATETIME DEFAULT CURRENT_TIMESTAMP,
     captcha BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (userID) REFERENCES users(id))`);
@@ -44,6 +46,8 @@ function setupDB() {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     drawboxID INTEGER NOT NULL,
     name TEXT NOT NULL,
+    creator TEXT DEFAULT 'Anonymous',
+    description TEXT DEFAULT 'No description provided',
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (drawboxID) REFERENCES drawboxes(id))`);
 }
@@ -219,10 +223,14 @@ function getDrawboxByHost(host) {
     });
 }
 
-function addEntry(drawboxID, name) {
+function addEntry(drawboxID, name, creator, description) {
     return new Promise((resolve, reject) => {
-        const query = `INSERT INTO images (drawboxID, name) VALUES (?, ?)`;
-        db.run(query, [drawboxID, name || `${this.lastID + 1}.png`], function (err) {
+        if (!creator, !description) {
+            creator = 'Anonymous';
+            description = 'No description provided';
+        }
+        const query = `INSERT INTO images (drawboxID, name, creator, description) VALUES (?, ?, ?, ?)`;
+        db.run(query, [drawboxID, name || `${this.lastID + 1}.png`, creator, description], function (err) {
             if (err) {
                 return reject({ success: false, message: err.message });
             }

@@ -298,9 +298,27 @@ app.post('/addEntry', async (req, res) => {
     const userDir = path.join('users', drawbox.name, 'images');
 
     try {
+        var description = req.body.description;
+        var creator = req.body.creator;
+        
+        if (!drawbox.descriptions) {
+            description = null;
+        }
+        if (!drawbox.creator) {
+            creator = null;
+        }
+
+        if (description.length > 100) {
+            return res.status(400).json({ error: 'Description is too long', success: false });
+        }
+
+        if (creator.length > 20) {
+            return res.status(400).json({ error: 'Creator name is too long', success: false });
+        }
+
         await fs.ensureDir(userDir);
         const totalImages = await db.getDrawboxEntryCount(drawbox.id);
-        await db.addEntry(drawbox.id, `${totalImages + 1}.png`);
+        await db.addEntry(drawbox.id, `${totalImages + 1}.png`, creator || null, description || null);
         const imageBuffer = Buffer.from(req.body.image.split(',')[1], 'base64');
         const filename = (totalImages + 1) + '.png';
         const filePath = path.join(userDir, filename);
@@ -345,43 +363,31 @@ app.delete('/deleteImage/:id', loggedInMiddleware, async (req, res) => {
     }
 });
 
-app.post('/setDomain', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
-    const { domain } = req.body;
+app.post('/setConfig', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
+    const { domain, captcha, color, backgroundColor, creators, descriptions } = req.body;
     const userId = req.user.id;
 
     try {
-        const query = `UPDATE drawboxes SET domain = ? WHERE userID = ?`;
-        await db.db.run(query, [domain, userId]);
-        res.redirect('/dashboard?message=Domain set successfully! :3');
-    } catch (error) {
-        res.status(500).json({ error: error.message, success: false });
-    }
-});
+        const updateDomainQuery = `UPDATE drawboxes SET domain = ? WHERE userID = ?`;
+        await db.db.run(updateDomainQuery, [domain, userId]);
 
-app.post('/setCaptcha', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
-    const { captcha } = req.body;
-    const userId = req.user.id;
+        const updateCaptchaQuery = `UPDATE drawboxes SET captcha = ? WHERE userID = ?`;
+        await db.db.run(updateCaptchaQuery, [captcha ? 1 : 0, userId]);
 
-    try {
-        const query = `UPDATE drawboxes SET captcha = ? WHERE userID = ?`;
-        await db.db.run(query, [captcha, userId]);
-        res.redirect('/dashboard?message=Captcha set successfully! :3');
-    } catch (error) {
-        res.status(500).json({ error: error.message, success: false });
-    }
-});
-
-app.post('/setColor', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
-    const { color, backgroundColor } = req.body;
-    const userId = req.user.id;
-
-    try {
         await db.changeDrawboxColor(userId, backgroundColor, color);
-        res.redirect('/dashboard?message=Color set successfully! :3');
+
+        const updateCreatorsQuery = `UPDATE drawboxes SET usernames = ? WHERE userID = ?`;
+        await db.db.run(updateCreatorsQuery, [creators ? 1 : 0, userId]);
+
+        const updateDescriptionsQuery = `UPDATE drawboxes SET descriptions = ? WHERE userID = ?`;
+        await db.db.run(updateDescriptionsQuery, [descriptions ? 1 : 0, userId]);
+
+        res.redirect('/dashboard?message=Configuration updated successfully! :3');
     } catch (error) {
-        res.status(500).json({ error: error.message, success: false });
+        res.redirect('/dashboard?message=An error occurred while updating the configuration. Please try again later.');
     }
-})
+});
+
 
 app.post('/setCustomStyles', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
     const { customStyles } = req.body;
@@ -397,6 +403,16 @@ app.post('/setCustomStyles', sameSiteMiddleware, loggedInMiddleware, async (req,
     } catch (error) {
         res.status(500).json({ error: error.message, success: false });
     }
+});
+
+app.get('/retrieveCustomStyles/:id', async (req, res) => {
+    db.getDrawboxById(req.params.id).then((drawbox) => {
+        if (!drawbox) {
+            return res.status(404).json({ error: 'Drawbox not found', success: false });
+        }
+        const customStyles = fs.readFileSync(path.join('users', drawbox.name, 'css', 'index.css'), 'utf8');
+        res.send(customStyles);
+    });
 });
 
 fs.ensureDirSync('users');

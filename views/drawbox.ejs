@@ -1,17 +1,29 @@
 <head>
     <title><%- drawbox.name.charAt(0).toUpperCase() + drawbox.name.slice(1) %>'s DrawBox! - <%= env.CLEAN_HOST %></title>
     <meta name="description" content="<%= drawbox.name %>'s DrawBox! Draw something and submit it to the gallery! pls pls pls">
+    <rel link="stylesheet" href="/retrieveCustomStyles/<%= drawbox.id %>">
 </head>
 <body>
     <div class="container">
         <h1><%- drawbox.name.charAt(0).toUpperCase() + drawbox.name.slice(1) %>'s DrawBox!</h1>
         <canvas id="drawCanvas" width="200" height="200" style="border:1px solid #000000;"></canvas>
         <button id="undoButton">Undo</button>
+        <br>
+            <% if (drawbox.usernames) { %>
+                <label for="creator">Your Name:</label>
+                <input id="creator" type="text" value="Anonymous" maxlength="10">
+                <br>
+            <% } %>
+            <% if (drawbox.descriptions) { %>
+                <label for="description">Leave a message for <%= drawbox.name %>!</label>
+                <input id="description" type="text" maxlength="100">
+            <% } %>
             <% if (drawbox.captcha) { %>
                 <div id="captcha-container">
                     <script src="/js/captcha.js"></script>
                 </div>
             <% } %>
+            <br>
         <button id="submitDrawing">Submit Drawing</button>
         <script>
             const canvas = document.getElementById('drawCanvas');
@@ -81,7 +93,13 @@
             function sendMessage(image) {
                 var msg = {
                     image: image, 
-                    id: '<%= drawbox.id %>', 
+                    id: '<%= drawbox.id %>',
+                    <% if (drawbox.usernames) { %> 
+                    creator: document.getElementById('creator').value || 'Anonymous',
+                    <% } %>
+                    <% if (drawbox.descriptions) { %>
+                        description: document.getElementById('description').value || 'No message left.'
+                    <% } %>
                 }
                 <% if (drawbox.captcha) { %>
                     msg.captchaAnswer = document.getElementById('captchaAnswer').value;
@@ -106,6 +124,12 @@
         <div class="image-gallery">
             <% drawbox.images.forEach(image=> { %>
                 <div class="image-container" style="max-width: 200px; margin: 10px; position: relative;">
+                    <% if (drawbox.usernames) { %>
+                        <p class="image-name"><%= image.creator %></p>
+                    <% } %>
+                    <% if (drawbox.descriptions) { %>
+                        <p class="image-description"><%= image.description %></p>
+                    <% } %>
                     <img src="/retrieveImage/<%= image.id %>?domain=<%= drawbox.domain %>" alt="Drawing" style="max-width: 200px;">
                     <% if (user && drawbox.name == user.username) { %>
                         <button id="deleteButton" onclick="deleteImage('<%= image.id %>')" style="position: absolute; top: 1vh; right: 1vh;">X</button>

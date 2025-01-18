@@ -111,6 +111,7 @@ const notLoggedInMiddleware = async (req, res, next) => {
 
 app.get('/', userMiddleware, async (req, res) => {
     var host = req.headers.host.split(':')[0] || req.headers.host;
+    console.log(host);
     try {
         if (req.headers.host == process.env.HOST) {
             return res.render('index', { title: 'Free drawboxes for everyone :3' });

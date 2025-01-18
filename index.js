@@ -8,7 +8,7 @@ require('dotenv').config();
 
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 const path = require('path');
 const sharp = require('sharp');
 
@@ -110,13 +110,17 @@ const notLoggedInMiddleware = async (req, res, next) => {
 }
 
 app.get('/', userMiddleware, async (req, res) => {
-    var host = req.headers.host.split(':')[0];
+    var host = req.headers.host.split(':')[0] || req.headers.host;
     try {
         if (req.headers.host == process.env.HOST) {
             return res.render('index', { title: 'Free drawboxes for everyone :3' });
         } else {
             var drawbox = await db.getDrawboxByHost(host);
-            drawbox.images = await db.getDrawboxEntries(await drawbox.id);
+            if (drawbox) {
+                drawbox.images = await db.getDrawboxEntries(drawbox.id);
+            } else {
+                return res.status(404).send('Drawbox not found :P');
+            }
             if (drawbox) {
                 return res.render('drawbox', { drawbox: drawbox, title: `${drawbox.name}'s Guestbook!` });
             } else {

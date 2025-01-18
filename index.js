@@ -358,7 +358,7 @@ app.post('/addEntry', async (req, res) => {
     }
 
     if (drawbox.captcha) {
-        if (!verifyCaptcha(req, req.body.captchaToken, req.body.captchaAnswer)) {
+        if (!verifyCaptcha(await req, await req.body.captchaToken, await req.body.captchaAnswer)) {
             return res.status(400).json({ error: 'Invalid captcha solution', success: false });
         }
     }

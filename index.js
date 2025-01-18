@@ -98,7 +98,7 @@ const loggedInMiddleware = async (req, res, next) => {
 const notLoggedInMiddleware = async (req, res, next) => {
     const token = req.cookies['authorization'];
     if (token) {
-        jwt.verify(token, process.env.AUTH_SECRET, (err, decoded) => {  
+        jwt.verify(token, process.env.AUTH_SECRET, (err, decoded) => {
             if (err) {
                 cookieParser.clearCookie('authorization');
                 return { success: false };
@@ -146,7 +146,7 @@ app.get('/retrieveImage/:id', async (req, res) => {
     const host = req.headers.host.split(':')[0];
     var drawbox;
     if (host == process.env.CLEAN_HOST) {
-        drawbox = await db.getDrawboxByHost(req.query.domain); 
+        drawbox = await db.getDrawboxByHost(req.query.domain);
     } else {
         drawbox = await db.getDrawboxByHost(host);
     }
@@ -167,7 +167,7 @@ app.get('/retrieveImage/:id', async (req, res) => {
 });
 
 app.get('/auth', sameSiteMiddleware, notLoggedInMiddleware, (req, res) => {
-    res.render('auth', {title: 'Auth'});
+    res.render('auth', { title: 'Auth' });
 });
 
 app.post('/auth/login', sameSiteMiddleware, notLoggedInMiddleware, async (req, res) => {
@@ -212,7 +212,64 @@ app.post('/auth/register', notLoggedInMiddleware, async (req, res) => {
 
             if (result.success) {
                 fs.ensureDirSync(path.join("users", username, "css"));
-                fs.writeFileSync(path.join("users", username, "css", "index.css"), `/* Your CSS goes here! */`);
+                fs.writeFileSync(path.join("users", username, "css", "index.css"), `
+@font-face {
+    font-family: 'pixelserif';
+    src: url(/fonts/PIXEARG_.ttf);
+}
+body {
+    font-family: "pixelserif", Courier, monospace;
+    margin: 20px;
+    background-color: black;
+    color: #ffffff;
+}
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #000080;
+    border: 2px solid #ffffff;
+}
+.image-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+.image-container {
+    background-color: #c0c0c0;
+    padding: 8px;
+    border: 2px outset #ffffff;
+}
+#deleteButton {
+    background-color: #ff0000;
+    color: #ffffff;
+    border: 2px outset #ff0000;
+    padding: 1px;
+    padding: auto;
+    cursor: pointer;
+    font-family: "pixelserif", Courier, monospace;
+}
+button {
+    padding: 5px 10px;
+    margin: 5px;
+    background-color: #c0c0c0;
+    color: #000000;
+    border: 2px outset #ffffff;
+    font-family: "pixelserif", Courier, monospace;
+    cursor: pointer;
+}
+button:hover {
+    border-style: inset;
+}
+input {
+    padding: 5px;
+    margin: 5px 0;
+    background-color: #000000;
+    color: #00ff00;
+    border: 2px inset #ffffff;
+    font-family: "pixelserif", Courier, monospace;
+}`);
                 res.cookie('authorization', result.jwt, { httpOnly: true, secure: true });
                 res.redirect('/dashboard?message=Account created successfully! :3');
             } else {
@@ -302,17 +359,17 @@ app.post('/addEntry', async (req, res) => {
     const userDir = path.join('users', drawbox.name, 'images');
 
     try {
-        var description = req.body.description;
-        var creator = req.body.creator;
-        
+        var description = await req.body.description;
+        var creator = await req.body.creator;
+
         if (!drawbox.descriptions) {
             description = null;
         }
-        if (!drawbox.creator) {
+        if (!drawbox.usernames) {
             creator = null;
         }
 
-        if (description && description.length > 100) {
+        if (description && description.length > 50) {
             return res.status(400).json({ error: 'Description is too long', success: false });
         }
 
@@ -322,7 +379,8 @@ app.post('/addEntry', async (req, res) => {
 
         await fs.ensureDir(userDir);
         const totalImages = await db.getDrawboxEntryCount(drawbox.id);
-        await db.addEntry(drawbox.id, `${totalImages + 1}.png`, creator || null, description || null);
+        console.log(creator);
+        await db.addEntry(drawbox.id, `${totalImages + 1}.png`, creator, description);
         const imageBuffer = Buffer.from(req.body.image.split(',')[1], 'base64');
         const filename = (totalImages + 1) + '.png';
         const filePath = path.join(userDir, filename);

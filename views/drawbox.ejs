@@ -128,7 +128,7 @@
                         <p class="image-name"><%= image.creator %></p>
                     <% } %>
                     <% if (drawbox.descriptions) { %>
-                        <p class="image-description"><%= image.description %></p>
+                        <small class="image-description"><%= image.description %></small>
                     <% } %>
                     <img src="/retrieveImage/<%= image.id %>?domain=<%= drawbox.domain %>" alt="Drawing" style="max-width: 200px;">
                     <% if (user && drawbox.name == user.username) { %>

@@ -245,6 +245,10 @@ body {
   margin: 0;
   padding: 0;
 }
+.title {
+    text-align: center;
+    margin: 10px 0;
+}
 #deleteButton {
     background-color: #ff0000;
     color: #ffffff;

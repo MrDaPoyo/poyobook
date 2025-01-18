@@ -379,7 +379,6 @@ app.post('/addEntry', async (req, res) => {
 
         await fs.ensureDir(userDir);
         const totalImages = await db.getDrawboxEntryCount(drawbox.id);
-        console.log(creator);
         await db.addEntry(drawbox.id, `${totalImages + 1}.png`, creator, description);
         const imageBuffer = Buffer.from(req.body.image.split(',')[1], 'base64');
         const filename = (totalImages + 1) + '.png';

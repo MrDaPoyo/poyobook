@@ -308,11 +308,11 @@ app.post('/addEntry', async (req, res) => {
             creator = null;
         }
 
-        if (description.length > 100) {
+        if (description && description.length > 100) {
             return res.status(400).json({ error: 'Description is too long', success: false });
         }
 
-        if (creator.length > 20) {
+        if (creator && creator.length > 20) {
             return res.status(400).json({ error: 'Creator name is too long', success: false });
         }
 

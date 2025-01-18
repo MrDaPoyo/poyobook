@@ -116,7 +116,7 @@ app.get('/', userMiddleware, async (req, res) => {
             return res.render('index', { title: 'Free drawboxes for everyone :3' });
         } else {
             var drawbox = await db.getDrawboxByHost(host);
-            drawbox.images = await db.getDrawboxEntries(drawbox.id);
+            drawbox.images = await db.getDrawboxEntries(await drawbox.id);
             if (drawbox) {
                 return res.render('drawbox', { drawbox: drawbox, title: `${drawbox.name}'s Guestbook!` });
             } else {

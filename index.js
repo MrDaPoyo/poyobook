@@ -413,10 +413,10 @@ app.delete('/deleteImage/:id', loggedInMiddleware, async (req, res) => {
             return res.status(404).json({ error: 'Drawbox not found', success: false });
         }
 
-        var image = await db.getEntry(drawbox.id, id);
+        var image = await db.getEntry(await drawbox.id, id);
 
-        const userDir = path.join('users', drawbox.name, 'images');
-        const filePath = path.join(userDir, image.name);
+        const userDir = path.join('users', await drawbox.name, 'images');
+        const filePath = path.join(userDir, await image.name);
 
         if (fs.existsSync(filePath)) {
             await fs.remove(filePath);

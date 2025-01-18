@@ -95,7 +95,7 @@
                     image: image, 
                     id: '<%= drawbox.id %>',
                     <% if (drawbox.usernames) { %> 
-                    creator: document.getElementById('creator').value || 'Anonymous',
+                        creator: document.getElementById('creator').value || 'Anonymous',
                     <% } %>
                     <% if (drawbox.descriptions) { %>
                         description: document.getElementById('description').value || 'No message left.'

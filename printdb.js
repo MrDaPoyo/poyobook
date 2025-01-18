@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 
 // Open the database (replace 'database.db' with the path to your SQLite database)
-let db = new sqlite3.Database('poyoweb.db', sqlite3.OPEN_READONLY, (err) => {
+let db = new sqlite3.Database('poyobox.db', sqlite3.OPEN_READONLY, (err) => {
     if (err) {
         console.error(err.message);
     }

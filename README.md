@@ -33,15 +33,25 @@ Here're some of the project's best features:
 Technologies used in the project:
 
 *   Node.JS
-```
+*   JWT
+*   BCrypt
+*   PoyoMagic (not really but I did cook lol)
+
+<h2>🤔 How should your .env look like?</h2>
+
+Here's an example of how your `.env` file should look like:
+
+```env
 HOST=localhost:3000
 CLEAN_HOST=localhost
 PORT=3000
 
-AUTH_SECRET=josjaldkajsldkasldkajsdjlakjsdlkasjdñlflfjalksfnjlqñfñlkwnlkñfnqwlñfnlñqfnlwfnkljwensfkjlnf
+AUTH_SECRET=your_secret_key_here
 
 CONFIG_MAX_USERS=1000
 CONFIG_MAX_MESSAGE_SIZE=2000
 
 USER_MAX_MESSAGES=1000
 ```
+
+Note: Make sure to replace `your_secret_key_here` with a secure random string.

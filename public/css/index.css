@@ -24,6 +24,7 @@
 body {
     background-color: #92dcff;
     background-image: url('/backgrounds/bg.jpeg');
+    background-size: cover;
     color: var(--primary);
     font-family: 'easvhs', roboto;
 }

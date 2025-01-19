@@ -23,15 +23,16 @@ var userBlacklist = ['admin', 'administrator', 'root', 'moderator', 'mod', 'staf
 
 function checkUsername(username) {
     const regex = /^[a-zA-Z0-9]+$/; // Regex to allow only alphanumeric characters (letters and numbers)
-
-    if (username.length > 20) {
+    if (username.includes(' ')) {
+        return 'Username cannot contain spaces';
+    } else if (username.length > 20) {
         return 'Username must have at max 20 characters';
     } else if (!regex.test(username)) {
         return 'Username must contain only letters and numbers';
     } else if (userBlacklist.includes(username)) {
         return 'Username is blacklisted, try again with a different username';
     } else {
-        return true;
+        return false;
     }
 }
 
@@ -190,29 +191,8 @@ app.post('/auth/login', sameSiteMiddleware, notLoggedInMiddleware, async (req, r
     }
 });
 
-app.post('/auth/register', notLoggedInMiddleware, async (req, res) => {
-    var { username, email, password } = await req.body;
-    if (!username || !email || !password) {
-        return res.status(400).json({ error: 'Missing required fields', success: false });
-    } else if (email.length > 254) {
-        return res.status(400).json({ error: 'Email address is too long', success: false });
-    }
-    username = username.toLowerCase();
-    username = username.trim();
-    var usernameTest = checkUsername(username);
-    if (!usernameTest) {
-        return res.status(400).json({ error: usernameTest, success: false });
-    }
-    if (process.env.CONFIG_MAX_USERS < await db.getUserCount()) {
-        return res.status(400).json({ error: 'Max user capacity reached', success: false })
-    } else if (password.length > 7) {
-        try {
-            const hashedPassword = await db.hashPassword(password);
-            const result = await db.createUser(username, email, await hashedPassword);
-
-            if (result.success) {
-                fs.ensureDirSync(path.join("users", username, "css"));
-                fs.writeFileSync(path.join("users", username, "css", "index.css"), `
+function resetDefaultStyles(username) {
+    fs.writeFileSync(path.join("users", username, "css", "index.css"), `
 @font-face {
     font-family: 'pixelserif';
     src: url(/fonts/PIXEARG_.ttf);
@@ -276,7 +256,41 @@ input {
     color: #00ff00;
     border: 2px inset #ffffff;
     font-family: "pixelserif", Courier, monospace;
-}`);
+}
+textarea {
+    padding: 5px;
+    margin: 5px 0;
+    background-color: #000000;
+    color: #00ff00;
+    border: 2px inset #ffffff;
+    font-family: "pixelserif", Courier, monospace;
+}
+`);
+}
+
+app.post('/auth/register', notLoggedInMiddleware, async (req, res) => {
+    var { username, email, password } = await req.body;
+    if (!username || !email || !password) {
+        return res.status(400).json({ error: 'Missing required fields', success: false });
+    } else if (email.length > 254) {
+        return res.status(400).json({ error: 'Email address is too long', success: false });
+    }
+    username = username.toLowerCase();
+    username = username.trim();
+    var usernameTest = checkUsername(username);
+    if (usernameTest) {
+        return res.status(400).json({ error: usernameTest, success: false });
+    }
+    if (process.env.CONFIG_MAX_USERS < await db.getUserCount()) {
+        return res.status(400).json({ error: 'Max user capacity reached', success: false })
+    } else if (password.length > 7) {
+        try {
+            const hashedPassword = await db.hashPassword(password);
+            const result = await db.createUser(username, email, await hashedPassword);
+
+            if (result.success) {
+                fs.ensureDirSync(path.join("users", username, "css"));
+                resetDefaultStyles(username);
                 res.cookie('authorization', result.jwt, { httpOnly: true, secure: true });
                 res.redirect('/dashboard?message=Account created successfully! :3');
             } else {

@@ -15,8 +15,10 @@
     <meta name="theme-color" content="#4CAF50">
 </head>
 <body>
-    <h1 class="title">PoyoBox! - <%= title %></h1>
-    <% if (message) { %>
-        <center><p class="message"><%= message %></p></center>
-    <% } %>
-    <hr>
+    <div class="megacontainer">
+        <header id="header"></header>
+        <% if (message) { %>
+            <center class="message"><p><%= message %></p></center>
+        <% } %>
+        <hr>
+        <h1 class="title">PoyoBox! - <%= title %></h1>

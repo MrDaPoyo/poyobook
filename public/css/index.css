@@ -1,8 +1,12 @@
 :root {
     --primary: black;
-    --secondary: #add8e6;
+    --secondary: #dff2ff;
     --message-background: red;
     --message-text: var(--primary);
+}
+
+* {
+    box-sizing: border-box;
 }
 
 @font-face {
@@ -18,8 +22,8 @@
 }
 
 body {
-    background-color: var(--primary);
-    color: var(--secondary);
+    background-image: url('/backgrounds/bg.jpeg');
+    color: var(--primary);
     font-family: 'easvhs', roboto;
 }
 
@@ -28,13 +32,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 a {
-    color: var(--secondary);
+    color: var(--primary);
 }
 
 input, button {
-    background-color: var(--primary);
-    color: var(--secondary);
-    border: 1px solid var(--secondary);
+    background-color: var(--secondary);
+    color: var(--primary);
+    border: 1px solid var(--primary);
     transition: 0.3s;
 }
 
@@ -43,10 +47,24 @@ button:hover {
     color: var(--primary);
 }
 
+.megacontainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 75%;
+    height: 100%;
+    margin-inline: auto;
+    position: relative;
+    background-color: var(--secondary);
+}
+
 .message {
-    padding: 1vh;
+    padding: 0;
     background-color: var(--message-background);
     color: var(--message-text);
+    width: 100%;
+    margin: 0;
 }
 
 .row-container {
@@ -70,4 +88,15 @@ button:hover {
 
 .drawing-container img {
     background-color: grey;
+}
+
+#header {
+    height: 200px;
+    width: 100%;
+    background: #1c8fe0;
+    background-image: url('/banners/banner.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: relative;
 }

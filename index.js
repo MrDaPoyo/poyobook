@@ -153,10 +153,10 @@ app.get('/retrieveImage/:id', async (req, res) => {
     if (!drawbox) {
         return res.status(404).json({ error: 'Drawbox not found', success: false });
     }
-    const userDir = path.join('users', drawbox.name, 'images');
+    const userDir = path.join('users', await drawbox.name, 'images');
     const id = req.params.id;
-    var image = await db.getEntry(drawbox.id, id);
-    const filePath = path.join(userDir, image.name);
+    var image = await db.getEntry(await drawbox.id, id);
+    const filePath = path.join(userDir, await image.name);
 
     // Check if the file exists
     if (fs.existsSync(filePath)) {
@@ -386,9 +386,10 @@ app.post('/addEntry', async (req, res) => {
 
         await fs.ensureDir(userDir);
         const totalImages = await db.getDrawboxEntryCount(drawbox.id);
-        await db.addEntry(drawbox.id, `${totalImages + 1}.png`, creator, description);
+        const name = totalImages + Math.random().toString(36).substring(2) + '.png';
+        await db.addEntry(drawbox.id, `${name}.png`, creator, description);
         const imageBuffer = Buffer.from(req.body.image.split(',')[1], 'base64');
-        const filename = (totalImages + 1) + '.png';
+        const filename = name + '.png';
         const filePath = path.join(userDir, filename);
         await fs.writeFile(filePath, imageBuffer);
 

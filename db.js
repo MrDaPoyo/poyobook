@@ -338,7 +338,7 @@ function resetPassword(email) {
     });
 }
 
-function changePasswordByEmail(email) {
+function changePasswordByEmail(email, password) {
     return new Promise((resolve, reject) => {
         const query = `SELECT * FROM users WHERE email = ?`;
         db.get(query, [email], (err, row) => {
@@ -347,9 +347,17 @@ function changePasswordByEmail(email) {
             } else if (!row) {
                 resolve({ success: false, error: 'User not found' });
             } else {
-                const token = jwt.sign({ email }, process.env.AUTH_SECRET, { expiresIn: '1h', issuer: 'PoyoBox.net' });
-                mailer.sendRecoveryEmail(token, email);
-                resolve({ success: true, message: 'Password reset successful :D' });
+                bcrypt.hash(password, 10, (err, hash) => {
+                    if (err) {
+                        reject({ success: false, error: err.message });
+                    }
+                    db.run(`UPDATE users SET password = ? WHERE email = ?`, [hash, email], (err) => {
+                        if (err) {
+                            reject({ success: false, error: err.message });
+                        }
+                        resolve({ success: true, message: 'Password changed successfully' });
+                    });
+                });
             }
         });
     });

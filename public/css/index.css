@@ -151,3 +151,29 @@ button:hover {
     margin: 0;
     padding: 1vh;
 }
+
+@media screen and (max-width: 768px) {
+    .megacontainer {
+        width: 100%;
+    }
+
+    .inbox-container {
+        width: 100%;
+    }
+
+    .drawing-container {
+        width: 100%;
+    }
+
+    .drawboxEntries {
+        width: 100%;
+    }
+
+    .indexImageContainer {
+        width: 100%;
+    }
+    
+    #footer {
+        width: 100%;
+    }
+}

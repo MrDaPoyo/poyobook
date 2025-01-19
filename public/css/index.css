@@ -119,3 +119,33 @@ button:hover {
 #footer a {
     color: var(--secondary);
 }
+
+.drawboxEntries {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    overflow: hidden;
+}
+
+.marquee {
+    display: flex;
+    animation: scroll 10s linear infinite;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+    background-color: var(--secondary);
+    color: var(--primary);
+    padding: 1vh;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}

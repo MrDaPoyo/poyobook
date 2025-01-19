@@ -5,4 +5,13 @@
     <% } else { %>
         <p>Create yours <strong>TODAY</strong>(!!!) <a href="/auth">-></a></p>
     <% } %>
+    <div class="drawboxEntries">
+        <div class="marquee">
+            <% drawboxEntries.forEach((entry, index) => { %>
+                <% entry.images.forEach((image, imageIndex) => { %>
+                    <img src="/retrieveImage/<%= entry.drawbox.id %>/<%= image.id %>" alt="<%= image.description %>">
+                <% }); %>
+            <% }); %>
+        </div>
+    </div>
 <%- include('footer.ejs') %>

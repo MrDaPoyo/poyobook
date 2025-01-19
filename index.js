@@ -114,7 +114,7 @@ app.get('/', userMiddleware, async (req, res) => {
     var host = req.headers.host.split(':')[0] || req.headers.host;
     try {
         if (req.headers.host == process.env.HOST) {
-            return res.render('index', { title: 'Free drawboxes for everyone :3' });
+            return res.render('index', { title: 'Free drawboxes for everyone :3', drawboxEntries: await db.getIndexDrawboxEntries() });
         } else {
             var drawbox = await db.getDrawboxByHost(host);
             if (drawbox) {
@@ -151,6 +151,24 @@ app.get('/retrieveImage/:id', async (req, res) => {
     } else {
         drawbox = await db.getDrawboxByHost(host);
     }
+    if (!drawbox) {
+        return res.status(404).json({ error: 'Drawbox not found', success: false });
+    }
+    const userDir = path.join('users', await drawbox.name, 'images');
+    const id = req.params.id;
+    var image = await db.getEntry(await drawbox.id, id);
+    const filePath = path.join(userDir, await image.name);
+
+    // Check if the file exists
+    if (fs.existsSync(filePath)) {
+        res.sendFile(path.resolve(filePath));
+    } else {
+        res.status(404).json({ error: 'Image not found', success: false });
+    }
+});
+
+app.get('/retrieveImage/:drawboxId/:id', async (req, res) => {
+    const drawbox = await db.getDrawboxById(req.params.drawboxId);
     if (!drawbox) {
         return res.status(404).json({ error: 'Drawbox not found', success: false });
     }

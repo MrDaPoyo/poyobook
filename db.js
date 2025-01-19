@@ -22,7 +22,7 @@ function setupDB() {
     tier INTEGER NOT NULL DEFAULT 0,
     modality TEXT DEFAULT 'drawbox',
     admin INTEGER NOT NULL DEFAULT 0)`);
-    
+
     // Create drawboxes table
     db.run(`CREATE TABLE IF NOT EXISTS drawboxes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,6 +38,7 @@ function setupDB() {
     usernames BOOLEAN DEFAULT TRUE,
     descriptions BOOLEAN DEFAULT TRUE,
     lastUpdated DATETIME DEFAULT CURRENT_TIMESTAMP,
+    imageDisplayInIndex BOOLEAN DEFAULT TRUE,
     captcha BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (userID) REFERENCES users(id))`);
 
@@ -286,6 +287,39 @@ function changeDrawboxColor(drawboxID, backgroundColor, color) {
     });
 }
 
+function getIndexDrawboxEntries() {
+    return new Promise((resolve, reject) => {
+        // First get all drawboxes where imageDisplayInIndex is true
+        const query = `SELECT * FROM drawboxes WHERE imageDisplayInIndex = TRUE`;
+        db.all(query, [], (err, drawboxes) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+
+            // For each drawbox, get its images
+            const promises = drawboxes.map(drawbox => {
+                return new Promise((resolve, reject) => {
+                    db.all(`SELECT * FROM images WHERE drawboxID = ?`, [drawbox.id], (err, images) => {
+                        if (err) {
+                            reject(err);
+                            return;
+                        }
+                        resolve({
+                            drawbox: drawbox,
+                            images: images
+                        });
+                    });
+                });
+            });
+
+            Promise.all(promises)
+                .then(results => resolve(results))
+                .catch(err => reject(err));
+        });
+    });
+}
+
 module.exports = {
     db,
     createUser,
@@ -302,5 +336,6 @@ module.exports = {
     deleteEntry,
     getDrawboxEntryCount,
     changeDrawboxColor,
-    getEntry
+    getEntry,
+    getIndexDrawboxEntries
 };

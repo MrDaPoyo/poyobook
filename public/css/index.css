@@ -51,10 +51,10 @@ button:hover {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
     width: 75%;
     height: 100%;
     margin-inline: auto;
+    padding: 1vh;
     position: relative;
     background-color: var(--secondary);
 }
@@ -99,4 +99,21 @@ button:hover {
     background-repeat: no-repeat;
     background-position: center;
     position: relative;
+}
+
+.title {
+    margin-top: 0;
+}
+
+#footer {
+    width: 75%;
+    background-color: var(--primary);
+    color: var(--secondary);
+    text-align: center;
+    padding: 1vh;
+    margin-inline: auto;
+}
+
+#footer a {
+    color: var(--secondary);
 }

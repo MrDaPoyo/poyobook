@@ -322,6 +322,60 @@ app.post('/auth/register', notLoggedInMiddleware, async (req, res) => {
     }
 });
 
+app.get('/auth/recover', sameSiteMiddleware, notLoggedInMiddleware, (req, res) => {
+    res.render('recover', { title: 'Recover Your Account >.<' });
+});
+
+app.post('/auth/recover', sameSiteMiddleware, notLoggedInMiddleware, async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ error: 'Missing required fields', success: false });
+    }
+    try {
+        const result = await db.resetPassword(email);
+        if (result.success) {
+            res.redirect('/auth/?message=' + result.message);
+        } else {
+            res.redirect('/auth/recover?message=' + result.error);
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/auth/recover/:token', sameSiteMiddleware, notLoggedInMiddleware, async (req, res) => {
+    const token = req.params.token;
+    jwt.verify(token, process.env.AUTH_SECRET, (err, decoded) => {
+        if (err) {
+            return res.redirect("/auth/?message=Invalid token, it might've expired! D:");
+        } else {
+            return res.render('reset', { title: 'Reset Your Password >.<', token: token });
+        }
+    });
+});
+
+app.post('/auth/recover/:token', sameSiteMiddleware, notLoggedInMiddleware, async (req, res) => {
+    const token = req.params.token;
+    const { password } = req.body;
+    if (!password) {
+        return res.status(400).json({ error: 'Missing required fields', success: false });
+    }
+    var decoded = jwt.verify(token, process.env.AUTH_SECRET);
+    if (!decoded) {
+        return res.status(400).json({ error: 'Invalid token', success: false });
+    }
+    try {
+        const result = await db.changePasswordByEmail(decoded.email, password);
+        if (result.success) {
+            res.redirect('/auth/?message=' + result.message);
+        } else {
+            res.redirect('/auth/recover?message=' + result.error);
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.get('/dashboard', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
     const user = await db.getUserById(req.user.id);
     var drawbox = await db.getDrawboxById(req.user.id);

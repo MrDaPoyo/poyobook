@@ -130,7 +130,7 @@ button:hover {
 .marquee {
     display: flex;
     animation: scroll 10s linear infinite;
-    width: 100%;
+    width: auto;
     white-space: nowrap;
     overflow: hidden;
     position: relative;

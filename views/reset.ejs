@@ -1,0 +1,7 @@
+<%- include('header') %>
+<form action="/auth/recover/<%= token %>" method="POST">
+    <label for="email">Choose a new password!<br><small>But be careful this time, aight? ;3</small></label>
+    <input type="password" id="password" name="password" required><br>
+    <button type="submit">Reset Password</button>
+</form>
+<%- include('footer') %>

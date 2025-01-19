@@ -1,6 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+var mailer = require('./mailer');
 require('dotenv').config();
 
 // Create a new database file if it doesn't exist
@@ -320,6 +321,40 @@ function getIndexDrawboxEntries() {
     });
 }
 
+function resetPassword(email) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT * FROM users WHERE email = ?`;
+        db.get(query, [email], (err, row) => {
+            if (err) {
+                reject({ success: false, error: err.message });
+            } else if (!row) {
+                resolve({ success: false, error: 'User not found' });
+            } else {
+                const token = jwt.sign({ email }, process.env.AUTH_SECRET, { expiresIn: '1h', issuer: 'PoyoBox.net' });
+                mailer.sendRecoveryEmail(token, email);
+                resolve({ success: true, message: 'Password reset email sent :D' });
+            }
+        });
+    });
+}
+
+function changePasswordByEmail(email) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT * FROM users WHERE email = ?`;
+        db.get(query, [email], (err, row) => {
+            if (err) {
+                reject({ success: false, error: err.message });
+            } else if (!row) {
+                resolve({ success: false, error: 'User not found' });
+            } else {
+                const token = jwt.sign({ email }, process.env.AUTH_SECRET, { expiresIn: '1h', issuer: 'PoyoBox.net' });
+                mailer.sendRecoveryEmail(token, email);
+                resolve({ success: true, message: 'Password reset sucessful :D' });
+            }
+        });
+    });
+}
+
 module.exports = {
     db,
     createUser,
@@ -337,5 +372,7 @@ module.exports = {
     getDrawboxEntryCount,
     changeDrawboxColor,
     getEntry,
-    getIndexDrawboxEntries
+    getIndexDrawboxEntries,
+    resetPassword,
+    changePasswordByEmail
 };

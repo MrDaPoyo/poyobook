@@ -53,7 +53,7 @@ CONFIG_MAX_MESSAGE_SIZE=2000
 
 USER_MAX_MESSAGES=1000
 
-MAILER_EMAIL=censored@censored.com
+MAILER_ADDRESS=censored@censored.com
 MAILER_ALIAS=mailer@poyobox.net
 MAILER_PASSWORD=xxxx xxxx xxxx xxxx
 ```

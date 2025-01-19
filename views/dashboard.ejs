@@ -38,6 +38,9 @@
             <form action="/setConfig" method="POST">
                 <label for="domain">Set Domain:</label>
                 <input type="text" id="domain" name="domain" value="<%= drawbox.domain %>" required>
+                <form action="/resetDomain" method="POST">
+                    <button type="submit">Reset Domain</button>
+                </form>
                 <br>
                 <label for="captcha">Protect DrawBox with Captcha:</label>
                 <input type="checkbox" id="captcha" name="captcha" <%= drawbox.captcha ? 'checked' : '' %>>

@@ -523,6 +523,9 @@ app.post('/setConfig', sameSiteMiddleware, loggedInMiddleware, async (req, res) 
     const userId = req.user.id;
 
     try {
+        if (domain.includes(process.env.CLEAN_HOST)) {
+            return res.redirect(`/dashboard?message=Domain cannot be a ${process.env.CLEAN_HOST} subdomain! D: To claim back your subdomain reset it!`);
+        }
         const updateDomainQuery = `UPDATE drawboxes SET domain = ? WHERE userID = ?`;
         await db.db.run(updateDomainQuery, [domain, userId]);
 
@@ -543,6 +546,17 @@ app.post('/setConfig', sameSiteMiddleware, loggedInMiddleware, async (req, res) 
     }
 });
 
+app.post('/resetDomain', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
+    const userId = req.user.id;
+    const user = await db.getUserById(userId);
+    try {
+        const updateDomainQuery = `UPDATE drawboxes SET domain = ? WHERE userID = ?`;
+        await db.db.run(updateDomainQuery, [, userId]);
+        res.redirect('/dashboard?message=Domain reset successfully! :3');
+    } catch (error) {
+        res.redirect('/dashboard?message=An error occurred while resetting the domain. Please try again later.');
+    }
+});
 
 app.post('/setCustomStyles', sameSiteMiddleware, loggedInMiddleware, async (req, res) => {
     const { customStyles } = req.body;

@@ -16,9 +16,9 @@
 </head>
 <body>
     <div class="megacontainer">
-        <header id="header"></header>
+        <header id="header" onclick="window.location.href='/'"></header>
         <% if (message) { %>
             <center class="message"><p><%= message %></p></center>
         <% } %>
         <hr>
-        <h1 class="title">PoyoBox! - <%= title %></h1>
+        <h1 class="title"><a href="/">PoyoBox</a>! - <%= title %></h1>

@@ -29,7 +29,12 @@ body {
     font-family: 'easvhs', roboto;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: 'pixelserif', roboto;
 }
 
@@ -37,7 +42,8 @@ a {
     color: var(--primary);
 }
 
-input, button {
+input,
+button {
     background-color: var(--secondary);
     color: var(--primary);
     border: 1px solid var(--primary);
@@ -77,7 +83,7 @@ button:hover {
 }
 
 .inbox-container {
-    width: 50%;    
+    width: 50%;
 }
 
 .drawing-container {
@@ -127,25 +133,21 @@ button:hover {
     overflow: hidden;
 }
 
-.marquee {
-    display: flex;
-    animation: scroll 10s linear infinite;
-    width: auto;
-    white-space: nowrap;
-    overflow: hidden;
-    position: relative;
-    background-color: var(--secondary);
-    color: var(--primary);
-    padding: 1vh;
-    align-items: center;
-    justify-content: space-evenly;
+.indexImageContainer {
+    display: inline-block;
+    text-align: center;
+    margin: 1vh;
+    outline: 1px solid var(--primary);
+    border-radius: 5px 5px 0 0;
 }
 
-@keyframes scroll {
-    0% {
-        transform: translateX(100%);
-    }
-    100% {
-        transform: translateX(-100%);
-    }
+.imageData {
+    color: var(--secondary);
+    background-color: var(--primary);
+    padding: 1vh;
+}
+
+.imageDescription {
+    margin: 0;
+    padding: 1vh;
 }

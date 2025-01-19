@@ -6,12 +6,42 @@
         <p>Create yours <strong>TODAY</strong>(!!!) <a href="/auth">-></a></p>
     <% } %>
     <div class="drawboxEntries">
-        <div class="marquee">
+        <div class="marquee" style="white-space: nowrap; overflow-x: hidden;">
             <% drawboxEntries.forEach((entry, index) => { %>
                 <% entry.images.forEach((image, imageIndex) => { %>
-                    <img src="/retrieveImage/<%= entry.drawbox.id %>/<%= image.id %>" alt="<%= image.description %>">
+                    <div div class="indexImageContainer">
+                        <img src="/retrieveImage/<%= entry.drawbox.id %>/<%= image.id %>" alt="<%= image.description %> by <%= image.creator %>" style="display: block;">
+                        <div class="imageData">
+                            <p style="margin: 0; padding: 1vh;" class="imageCreator"><%= image.creator %></p>
+                            <small class="imageDescription"><%= (image.description || '').substring(0, 20) + (image.description?.length > 20 ? '...' : '') %></small>
+                        </div>
+                    </div>
                 <% }); %>
             <% }); %>
         </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const marquee = document.querySelector('.marquee');
+        if (!marquee) return;
+
+        // Duplicate images for scrolling
+        const images = Array.from(marquee.querySelectorAll('.indexImageContainer'));
+        images.forEach(div => {
+            const clone = div.cloneNode(true);
+            marquee.appendChild(clone);
+        });
+
+        // Simple horizontal scroll
+        let offset = 0;
+        setInterval(() => {
+            offset++;
+            marquee.scrollLeft = offset;
+            // Reset scroll if halfway
+            if (offset >= (marquee.scrollWidth / 2)) {
+                offset = 0;
+            }
+        }, 20);
+    });
+    </script>
     </div>
 <%- include('footer.ejs') %>

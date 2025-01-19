@@ -349,7 +349,7 @@ function changePasswordByEmail(email) {
             } else {
                 const token = jwt.sign({ email }, process.env.AUTH_SECRET, { expiresIn: '1h', issuer: 'PoyoBox.net' });
                 mailer.sendRecoveryEmail(token, email);
-                resolve({ success: true, message: 'Password reset sucessful :D' });
+                resolve({ success: true, message: 'Password reset successful :D' });
             }
         });
     });

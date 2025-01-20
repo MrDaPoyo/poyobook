@@ -139,6 +139,7 @@ button:hover {
     margin: 1vh;
     outline: 1px solid var(--primary);
     border-radius: 5px 5px 0 0;
+    max-width: 200px;
 }
 
 .imageData {
@@ -170,7 +171,7 @@ button:hover {
     }
 
     .indexImageContainer {
-        width: 100%;
+        width: 200px;
     }
     
     #footer {

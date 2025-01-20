@@ -588,5 +588,5 @@ fs.ensureDirSync('users');
 
 // Start the server
 app.listen(port, () => {
-    console.log(`PoyoBook service running at http://localhost:${port}`);
+    console.log(`PoyoBox service running at http://localhost:${port}`);
 });

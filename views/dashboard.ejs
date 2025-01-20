@@ -35,13 +35,13 @@
         <div class="config-container" style="max-width: 30%;">
             <h3 style="margin: 0;">Config</h3>
             <hr>
-            <form action="/setConfig" method="POST">
+            <form action="/resetDomain" id="resetDomainForm" method="POST">
+                <button onclick="document.getElementById('resetDomainForm').submit();">Reset Domain</button>
+            </form>
+            <br>
+            <form action="/setConfig" method="POST"></form>
                 <label for="domain">Set Domain:</label>
-                <input type="text" id="domain" name="domain" value="<%= drawbox.domain %>" required>
-                <form action="/resetDomain" method="POST">
-                    <button type="submit">Reset Domain</button>
-                </form>
-                <br>
+                <input type="text" id="domain" name="domain" value="<%= drawbox.domain %>" required>    
                 <label for="captcha">Protect DrawBox with Captcha:</label>
                 <input type="checkbox" id="captcha" name="captcha" <%= drawbox.captcha ? 'checked' : '' %>>
                 

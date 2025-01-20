@@ -57,10 +57,10 @@
                 ctx.lineCap = 'round';
                 ctx.strokeStyle = '<%= drawbox.imageBrushColor %>';
 
-                ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+                ctx.lineTo(event.pageX - canvas.offsetLeft, event.pageY - canvas.offsetTop);
                 ctx.stroke();
                 ctx.beginPath();
-                ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+                ctx.moveTo(event.pageX - canvas.offsetLeft, event.pageY - canvas.offsetTop);
             }
 
             function saveState() {

@@ -551,7 +551,9 @@ app.post('/resetDomain', sameSiteMiddleware, loggedInMiddleware, async (req, res
     const user = await db.getUserById(userId);
     try {
         const updateDomainQuery = `UPDATE drawboxes SET domain = ? WHERE userID = ?`;
-        await db.db.run(updateDomainQuery, [, userId]);
+        const newDomain = `${await user.username}.${process.env.CLEAN_HOST}`;
+        console.log(newDomain);
+        await db.db.run(updateDomainQuery, [newDomain, userId]);
         res.redirect('/dashboard?message=Domain reset successfully! :3');
     } catch (error) {
         res.redirect('/dashboard?message=An error occurred while resetting the domain. Please try again later.');

@@ -152,12 +152,15 @@ app.get('/retrieveImage/:id', async (req, res) => {
     } else {
         drawbox = await db.getDrawboxByHost(host);
     }
-    if (!drawbox) {
+    if (!await drawbox) {
         return res.status(404).json({ error: 'Drawbox not found', success: false });
     }
     const userDir = path.join('users', await drawbox.name, 'images');
     const id = req.params.id;
     var image = await db.getEntry(await drawbox.id, id);
+    if (!await image) {
+        return res.status(404).json({ error: 'Image not found', success: false });
+    }
     const filePath = path.join(userDir, await image.name);
 
     // Check if the file exists

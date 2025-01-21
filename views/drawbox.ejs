@@ -31,10 +31,6 @@
             let drawing = false;
             let drawingHistory = [];
 
-            ctx.drawImage = function () {
-                alert('NOOOOOO >:((');
-            };
-
             // Set canvas background to white
             ctx.fillStyle = '<%= drawbox.imageBackgroundColor %>';
             ctx.fillRect(0, 0, canvas.width, canvas.height);

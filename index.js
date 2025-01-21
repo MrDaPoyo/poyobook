@@ -11,6 +11,7 @@ const app = express();
 const port = process.env.PORT;
 const path = require('path');
 const sharp = require('sharp');
+const multer = require('multer');
 
 app.use(cookieParser());
 app.use(bodyParser.json({ limit: '1mb' }));
@@ -441,13 +442,26 @@ function mapToClosestColor(pixel, color1, color2) {
     return distanceToColor1 < distanceToColor2 ? [...color1, pixel[3]] : [...color2, pixel[3]];
 }
 
-async function processImage(inputPath, outputPath, width, height, dbColor1, dbColor2) {
+// Set up multer for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 100 * 1024 }, // 100 KB limit
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype !== 'image/png') {
+            return cb(new Error('Only PNG files are allowed!'), false);
+        }
+        cb(null, true);
+    }
+});
+
+async function processImage(inputBuffer, outputPath, width, height, dbColor1, dbColor2) {
     try {
         // Parse colors from the database
         const color1 = dbColor1.match(/\w\w/g).map(hex => parseInt(hex, 16)); // [R, G, B]
         const color2 = dbColor2.match(/\w\w/g).map(hex => parseInt(hex, 16)); // [R, G, B]
 
-        const image = sharp(inputPath)
+        const image = sharp(inputBuffer)
             .resize(width, height, { kernel: 'nearest' }) // Resize with no anti-aliasing
             .raw() // Get raw pixel data
             .ensureAlpha();
@@ -464,10 +478,6 @@ async function processImage(inputPath, outputPath, width, height, dbColor1, dbCo
                     color1,
                     color2
                 );
-                // Check if the pixel is different from the two allowed colors
-                if (!mappedPixel.every((value, index) => value === color1[index] || value === color2[index])) {
-                    return false;
-                }
                 return mappedPixel;
             }).flat()
         );
@@ -484,7 +494,7 @@ async function processImage(inputPath, outputPath, width, height, dbColor1, dbCo
     }
 }
 
-app.post('/addEntry', async (req, res) => {
+app.post('/addEntry', upload.single('image'), async (req, res) => {
     const host = req.headers.host.split(':')[0];
     let drawbox;
     if (host == process.env.CLEAN_HOST) {
@@ -527,13 +537,12 @@ app.post('/addEntry', async (req, res) => {
         const totalImages = await db.getDrawboxEntryCount(drawbox.id);
         const name = totalImages + Math.random().toString(36).substring(2) + '.png';
         const newImageId = await db.addEntry(drawbox.id, `${name}.png`, creator, description);
-        const imageBuffer = Buffer.from(req.body.image.split(',')[1], 'base64');
         const filename = name + '.png';
         const filePath = path.join(userDir, filename);
-        await fs.writeFile(filePath, imageBuffer);
+        await fs.writeFile(filePath, req.file.buffer);
 
         const outputPath = path.join(userDir, 'processed_' + filename);
-        const processed = await processImage(filePath, outputPath, 100, 100, drawbox.imageBrushColor, drawbox.imageBackgroundColor);
+        const processed = await processImage(req.file.buffer, outputPath, 200, 200, drawbox.imageBrushColor, drawbox.imageBackgroundColor);
         if (!processed) {
             await db.deleteEntry(drawbox.id, newImageId);
             return res.status(500).json({ error: 'Error processing image', success: false });

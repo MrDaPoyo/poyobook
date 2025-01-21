@@ -498,6 +498,7 @@ async function processImage(inputBuffer, outputPath, width, height, dbColor1, db
 }
 
 app.post('/addEntry', upload.single('image'), async (req, res) => {
+    console.log(req.body);
     const host = req.headers.host.split(':')[0];
     let drawbox;
     if (host == process.env.CLEAN_HOST) {
@@ -518,8 +519,8 @@ app.post('/addEntry', upload.single('image'), async (req, res) => {
     const userDir = path.join('users', drawbox.name, 'images');
 
     try {
-        var description = await req.body.description;
-        var creator = await req.body.creator;
+        var description = req.body.description;
+        var creator = req.body.creator;
 
         if (!drawbox.descriptions) {
             description = null;

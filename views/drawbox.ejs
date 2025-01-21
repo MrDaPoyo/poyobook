@@ -105,49 +105,61 @@
                 var image = canvas.toDataURL("image/png");
                 sendMessage(image);
             }
-
             function sendMessage(image) {
-                // Check if image is completely white/blank
-                var blank = true;
-                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                for (var i = 0; i < imageData.data.length; i += 4) {
-                    if (imageData.data[i] !== 255 || imageData.data[i+1] !== 255 || imageData.data[i+2] !== 255) {
-                        blank = false;
-                        break;
-                    }
-                }
-                if (blank) {
-                    alert('Cannot submit a blank image!');
-                    return;
-                }
-                var msg = {
-                    image: image, 
-                    id: '<%= drawbox.id %>',
-                    <% if (drawbox.usernames) { %> 
-                        creator: document.getElementById('creator').value || 'Anonymous',
-                    <% } %>
-                    <% if (drawbox.descriptions) { %>
-                        description: document.getElementById('description').value || 'No message left.'
-                    <% } %>
-                }
-                <% if (drawbox.captcha) { %>
-                    msg.captchaAnswer = document.getElementById('captchaAnswer').value;
-                    msg.captchaToken = document.getElementById('captchaToken').value;
-                <% } %>
-                var msg = JSON.stringify(msg);
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', '/addEntry', true);
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.send(msg);
-                xhr.onload = function () {
-                    if (xhr.status == 200) {
-                        alert('Drawing submitted successfully!');
-                    } else {
-                        console.error('Error:', xhr.statusText);
-                    }
-                };
-                setTimeout(() => { window.location.reload(); }, 2000);
+        // Check if image is completely white/blank
+        var blank = true;
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < imageData.data.length; i += 4) {
+            if (imageData.data[i] !== 255 || imageData.data[i+1] !== 255 || imageData.data[i+2] !== 255) {
+                blank = false;
+                break;
             }
+        }
+        if (blank) {
+            alert('Cannot submit a blank image!');
+            return;
+        }
+        const formData = new FormData();
+        formData.append('image', dataURLtoBlob(image), 'drawing.png');
+        formData.append('id', '<%= drawbox.id %>');
+        <% if (drawbox.usernames) { %> 
+            formData.append('creator', document.getElementById('creator').value || 'Anonymous');
+        <% } %>
+        <% if (drawbox.descriptions) { %>
+            formData.append('description', document.getElementById('description').value || 'No message left.');
+        <% } %>
+        <% if (drawbox.captcha) { %>
+            formData.append('captchaAnswer', document.getElementById('captchaAnswer').value);
+            formData.append('captchaToken', document.getElementById('captchaToken').value);
+        <% } %>
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/addEntry', true);
+
+        // Helper function to convert dataURL to Blob
+        function dataURLtoBlob(dataURL) {
+            const arr = dataURL.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while(n--){
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], {type: mime});
+        }
+
+        xhr.onload = function () {
+            if (xhr.status == 200) {
+                alert('Drawing submitted successfully!');
+            } else {
+                console.error('Error:', xhr.statusText);
+            }
+        };
+
+        xhr.send(formData);
+        setTimeout(() => { window.location.reload(); }, 2000);
+    }
         </script>
         <hr>
         <div class="image-gallery">

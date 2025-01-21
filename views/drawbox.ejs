@@ -41,9 +41,10 @@
             canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mousemove', draw);
 
-            function startDrawing() {
+            function startDrawing(event) {
                 drawing = true;
                 ctx.beginPath();
+                draw(event); // Start drawing immediately
             }
 
             function stopDrawing() {
@@ -58,10 +59,19 @@
                 ctx.lineCap = 'round';
                 ctx.strokeStyle = '<%= drawbox.imageBrushColor %>';
 
-                ctx.lineTo(event.pageX - canvas.offsetLeft, event.pageY - canvas.offsetTop);
+                let x, y;
+                if (event.touches) {
+                    x = event.touches[0].pageX - canvas.offsetLeft;
+                    y = event.touches[0].pageY - canvas.offsetTop;
+                } else {
+                    x = event.pageX - canvas.offsetLeft;
+                    y = event.pageY - canvas.offsetTop;
+                }
+
+                ctx.lineTo(x, y);
                 ctx.stroke();
                 ctx.beginPath();
-                ctx.moveTo(event.pageX - canvas.offsetLeft, event.pageY - canvas.offsetTop);
+                ctx.moveTo(x, y);
             }
 
             function saveState() {
@@ -79,6 +89,11 @@
                     }
                 }
             }
+
+            // Add touch event listeners for mobile compatibility
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('touchmove', draw);
 
             document.getElementById('submitDrawing').addEventListener('click', () => {
                 convertImage();

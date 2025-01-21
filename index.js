@@ -464,6 +464,10 @@ async function processImage(inputPath, outputPath, width, height, dbColor1, dbCo
                     color1,
                     color2
                 );
+                // Check if the pixel is different from the two allowed colors
+                if (!mappedPixel.every((value, index) => value === color1[index] || value === color2[index])) {
+                    return false;
+                }
                 return mappedPixel;
             }).flat()
         );
@@ -473,8 +477,10 @@ async function processImage(inputPath, outputPath, width, height, dbColor1, dbCo
             .toFile(outputPath);
 
         console.log('Image processing complete:', outputPath);
+        return true;
     } catch (error) {
         console.error('Error processing image:', error);
+        return false;
     }
 }
 
@@ -527,8 +533,11 @@ app.post('/addEntry', async (req, res) => {
         await fs.writeFile(filePath, imageBuffer);
 
         const outputPath = path.join(userDir, 'processed_' + filename);
-        await processImage(filePath, outputPath, 100, 100, drawbox.imageBrushColor, drawbox.imageBackgroundColor);
-        
+        const processed = await processImage(filePath, outputPath, 100, 100, drawbox.imageBrushColor, drawbox.imageBackgroundColor);
+        if (!processed) {
+            await db.deleteEntry(drawbox.id, newImageId);
+            return res.status(500).json({ error: 'Error processing image', success: false });
+        }
 
         res.status(200).json({ message: 'Image uploaded and resized successfully!' });
     } catch (error) {

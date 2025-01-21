@@ -511,7 +511,6 @@ async function processImage(inputBuffer, outputPath, width, height, dbColor1, db
 }
 
 app.post('/addEntry', upload.single('image'), async (req, res) => {
-    console.log(req.body);
     const host = req.headers.host.split(':')[0];
     let drawbox;
     if (host == process.env.CLEAN_HOST) {

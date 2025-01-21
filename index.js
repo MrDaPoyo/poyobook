@@ -458,7 +458,7 @@ async function processImage(inputPath, outputPath, width, height, dbColor1, dbCo
         const mappedData = Buffer.from(
             Array.from({ length: data.length / 4 }, (_, i) => {
                 const offset = i * 4;
-                const pixel = data.slice(offset, offset + 4); // [R, G, B, A]
+                const pixel = data.subarray(offset, offset + 4); // [R, G, B, A]
                 const mappedPixel = mapToClosestColor(
                     [pixel[0], pixel[1], pixel[2], pixel[3]],
                     color1,
@@ -497,7 +497,7 @@ app.post('/addEntry', async (req, res) => {
     }
 
     if (drawbox.captcha) {
-        if (!verifyCaptcha(await req, await req.body.captchaToken, await req.body.captchaAnswer)) {
+        if (!verifyCaptcha(req, req.body.captchaToken, req.body.captchaAnswer)) {
             return res.status(400).json({ error: 'Invalid captcha solution', success: false });
         }
     }

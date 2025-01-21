@@ -431,6 +431,53 @@ function verifyCaptcha(req, token, solution) {
     return false;
 }
 
+function mapToClosestColor(pixel, color1, color2) {
+    const distance = (c1, c2) =>
+        Math.sqrt((c1[0] - c2[0]) ** 2 + (c1[1] - c2[1]) ** 2 + (c1[2] - c2[2]) ** 2);
+
+    const distanceToColor1 = distance(pixel, color1);
+    const distanceToColor2 = distance(pixel, color2);
+
+    return distanceToColor1 < distanceToColor2 ? [...color1, pixel[3]] : [...color2, pixel[3]];
+}
+
+async function processImage(inputPath, outputPath, width, height, dbColor1, dbColor2) {
+    try {
+        // Parse colors from the database
+        const color1 = dbColor1.match(/\w\w/g).map(hex => parseInt(hex, 16)); // [R, G, B]
+        const color2 = dbColor2.match(/\w\w/g).map(hex => parseInt(hex, 16)); // [R, G, B]
+
+        const image = sharp(inputPath)
+            .resize(width, height, { kernel: 'nearest' }) // Resize with no anti-aliasing
+            .raw() // Get raw pixel data
+            .ensureAlpha();
+
+        const { data, info } = await image.toBuffer({ resolveWithObject: true });
+
+        // Map each pixel to the closest color
+        const mappedData = Buffer.from(
+            Array.from({ length: data.length / 4 }, (_, i) => {
+                const offset = i * 4;
+                const pixel = data.slice(offset, offset + 4); // [R, G, B, A]
+                const mappedPixel = mapToClosestColor(
+                    [pixel[0], pixel[1], pixel[2], pixel[3]],
+                    color1,
+                    color2
+                );
+                return mappedPixel;
+            }).flat()
+        );
+
+        // Write the output image with the remapped colors
+        await sharp(mappedData, { raw: { width: info.width, height: info.height, channels: 4 } })
+            .toFile(outputPath);
+
+        console.log('Image processing complete:', outputPath);
+    } catch (error) {
+        console.error('Error processing image:', error);
+    }
+}
+
 app.post('/addEntry', async (req, res) => {
     const host = req.headers.host.split(':')[0];
     let drawbox;
@@ -473,16 +520,16 @@ app.post('/addEntry', async (req, res) => {
         await fs.ensureDir(userDir);
         const totalImages = await db.getDrawboxEntryCount(drawbox.id);
         const name = totalImages + Math.random().toString(36).substring(2) + '.png';
-        await db.addEntry(drawbox.id, `${name}.png`, creator, description);
+        const newImageId = await db.addEntry(drawbox.id, `${name}.png`, creator, description);
         const imageBuffer = Buffer.from(req.body.image.split(',')[1], 'base64');
         const filename = name + '.png';
         const filePath = path.join(userDir, filename);
         await fs.writeFile(filePath, imageBuffer);
 
-        await sharp(filePath)
-            .resize(200, 200)
-            .toFile(path.join(userDir, "resized-" + filename));
-        await fs.rename(path.join(userDir, "resized-" + filename), path.join(userDir, filename));
+        const outputPath = path.join(userDir, 'processed_' + filename);
+        await processImage(filePath, outputPath, 100, 100, drawbox.imageBrushColor, drawbox.imageBackgroundColor);
+        
+
         res.status(200).json({ message: 'Image uploaded and resized successfully!' });
     } catch (error) {
         console.log(error);
@@ -507,11 +554,11 @@ app.delete('/deleteImage/:id', loggedInMiddleware, async (req, res) => {
 
         if (fs.existsSync(filePath)) {
             await fs.remove(filePath);
-            await db.deleteEntry(drawbox.id, id);
             res.status(200).json({ message: 'Image deleted successfully!', success: true });
         } else {
             res.status(404).json({ error: 'Image not found', success: false });
         }
+        await db.deleteEntry(drawbox.id, id);
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: error.message, success: false });
@@ -523,12 +570,13 @@ app.post('/setConfig', sameSiteMiddleware, loggedInMiddleware, async (req, res) 
     const userId = req.user.id;
 
     try {
-        if (domain.includes(process.env.CLEAN_HOST)) {
+        if (domain && domain.includes(process.env.CLEAN_HOST) && domain != `${req.user.username}.${process.env.CLEAN_HOST}`) {
             return res.redirect(`/dashboard?message=Domain cannot be a ${process.env.CLEAN_HOST} subdomain! D: To claim back your subdomain reset it!`);
         }
-        const updateDomainQuery = `UPDATE drawboxes SET domain = ? WHERE userID = ?`;
-        await db.db.run(updateDomainQuery, [domain, userId]);
-
+        if (domain) {
+            const updateDomainQuery = `UPDATE drawboxes SET domain = ? WHERE userID = ?`;
+            await db.db.run(updateDomainQuery, [domain, userId]);
+        }
         const updateCaptchaQuery = `UPDATE drawboxes SET captcha = ? WHERE userID = ?`;
         await db.db.run(updateCaptchaQuery, [captcha ? 1 : 0, userId]);
 
@@ -542,6 +590,7 @@ app.post('/setConfig', sameSiteMiddleware, loggedInMiddleware, async (req, res) 
 
         res.redirect('/dashboard?message=Configuration updated successfully! :3');
     } catch (error) {
+        console.log(error);
         res.redirect('/dashboard?message=An error occurred while updating the configuration. Please try again later.');
     }
 });

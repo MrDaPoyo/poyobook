@@ -31,9 +31,14 @@
             let drawing = false;
             let drawingHistory = [];
 
+            ctx.drawImage = function () {
+                alert('NOOOOOO >:((');
+            };
+
             // Set canvas background to white
             ctx.fillStyle = '<%= drawbox.imageBackgroundColor %>';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.imageSmoothingEnabled = false;
             saveState();
 
             canvas.addEventListener('mousedown', startDrawing);
@@ -91,6 +96,19 @@
             }
 
             function sendMessage(image) {
+                // Check if image is completely white/blank
+                var blank = true;
+                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                for (var i = 0; i < imageData.data.length; i += 4) {
+                    if (imageData.data[i] !== 255 || imageData.data[i+1] !== 255 || imageData.data[i+2] !== 255) {
+                        blank = false;
+                        break;
+                    }
+                }
+                if (blank) {
+                    alert('Cannot submit a blank image!');
+                    return;
+                }
                 var msg = {
                     image: image, 
                     id: '<%= drawbox.id %>',

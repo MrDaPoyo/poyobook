@@ -54,6 +54,7 @@
             }
 
             function draw(event) {
+                ctx.imageSmoothingEnabled = false;
                 if (!drawing) return;
                 ctx.lineWidth = 5;
                 ctx.lineCap = 'round';
@@ -102,6 +103,7 @@
             document.getElementById('undoButton').addEventListener('click', undo);
 
             function convertImage() {
+                ctx.imageSmoothingEnabled = false;
                 var image = canvas.toDataURL("image/png");
                 sendMessage(image);
             }

@@ -152,7 +152,7 @@
         <hr>
         <div class="image-gallery">
             <% drawbox.images.forEach(image=> { %>
-                <div class="image-container" style="max-width: 200px; margin: 10px; position: relative;">
+                <div class="image-container" style="min-width: 200px; max-width: 200px; min-height: 200px;max-height: 400px; margin: 10px; position: relative;">
                     <% if (drawbox.usernames) { %>
                         <p class="image-name"><%= image.creator %></p>
                     <% } %>

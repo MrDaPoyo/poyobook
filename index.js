@@ -471,6 +471,19 @@ async function processImage(inputBuffer, outputPath, width, height, dbColor1, db
 
         const { data, info } = await image.toBuffer({ resolveWithObject: true });
 
+        // Check if only the two colors are present
+        const uniqueColors = new Set();
+        for (let i = 0; i < data.length; i += 4) {
+            const pixel = [data[i], data[i + 1], data[i + 2]];
+            uniqueColors.add(pixel.join(','));
+            
+            // If we find more than two colors, return false
+            if (uniqueColors.size > 2) {
+                console.error('Image contains more than two colors');
+                return false;
+            }
+        }
+
         // Map each pixel to the closest color
         const mappedData = Buffer.from(
             Array.from({ length: data.length / 4 }, (_, i) => {
